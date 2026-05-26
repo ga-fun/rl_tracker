@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RlTracker.Cli/RlTracker.Cli.csproj" />
+    <Project Path="src/RlTracker.Core/RlTracker.Core.csproj" />
+  </Folder>
+</Solution>
