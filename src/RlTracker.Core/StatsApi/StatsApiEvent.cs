@@ -45,7 +45,7 @@ internal sealed class StatsApiEvent
 
 	private static StatsApiEventType ParseEventType(JsonDocument document)
 	{
-		string field = "Event";
+		const string field = "Event";
 		string value;
 
 		if (!document.RootElement.TryGetProperty(field, out JsonElement property))
@@ -62,7 +62,7 @@ internal sealed class StatsApiEvent
 	private static StatsApiPayload ParsePayload<T>(JsonDocument document)
 		where T : StatsApiPayload
 	{
-		string field = "Data";
+		const string field = "Data";
 
 		if (!document.RootElement.TryGetProperty(field, out JsonElement property))
 			throw new FormatException($"Missing field: \"{field}\".");

@@ -1,5 +1,5 @@
 namespace RlTracker.Core.StatsApi;
 
-public abstract class StatsApiPayload
+internal abstract class StatsApiPayload
 {
 }
