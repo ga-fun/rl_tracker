@@ -6,20 +6,6 @@ namespace RlStatsApi;
 
 public static class Config
 {
-	/* ---------- TODO: START ---------- */
-	// Move to Core project
-	private static readonly string EpicRlDefaultDir = Path.Combine(
-		Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-		"Epic Games",
-		"rocketleague");
-	private static readonly string SteamRlDefaultDir = Path.Combine(
-		Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-		"Steam",
-		"steamapps",
-		"common",
-		"rocketleague");
-	/* ---------- TODO: END ---------- */
-
 	public const int PortDefault = 49123;
 	public const int PortMin = 1;
 	public const int PortMax = IPEndPoint.MaxPort;
