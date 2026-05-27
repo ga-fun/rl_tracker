@@ -1,6 +1,6 @@
 namespace FileIni;
 
-public sealed partial class FileIni
+public sealed partial class IniFile
 {
 	public void Read()
 	{
@@ -57,7 +57,7 @@ public sealed partial class FileIni
 		value = line[(separator + 1)..];
 		try
 		{
-			SetValue(sectionName, key, value);
+			Set(sectionName, key, value);
 		}
 		catch (ArgumentException exception)
 		{

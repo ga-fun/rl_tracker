@@ -1,6 +1,6 @@
 namespace FileIni;
 
-public sealed partial class FileIni
+public sealed partial class IniFile
 {
 	private static string NormalizeFilePath(string filePath)
 	{

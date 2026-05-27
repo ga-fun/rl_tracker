@@ -4,9 +4,7 @@ namespace RlTracker.Core.Config;
 
 internal sealed class ConfigIni
 {
-	private const string Section = "TAGame.MatchStatsExporter_TA";
-	private const string PortKey = "Port";
-	private const string PacketSendRateKey = "PacketSendRate";
+
 
 	public string RlDir { get; }
 	public string RlIniFile { get; }

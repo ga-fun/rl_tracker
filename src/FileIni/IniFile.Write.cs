@@ -2,7 +2,7 @@ using System.Text;
 
 namespace FileIni;
 
-public sealed partial class FileIni
+public sealed partial class IniFile
 {
 	public void Write()
 	{
