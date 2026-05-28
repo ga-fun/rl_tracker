@@ -22,9 +22,9 @@ public sealed partial class IniFile(string filePath)
 		string sectionKey = NormalizeSection(sectionName);
 		string pairKey = NormalizeKey(key);
 
-		if (!_content.TryGet(sectionKey, out Dictionary<string, string>? section))
+		if (!_content.TryGetValue(sectionKey, out Dictionary<string, string>? section))
 			throw new KeyNotFoundException($"Section \"{sectionKey}\" not found in \"{FilePath}\".");
-		if (!section.TryGet(pairKey, out string? value))
+		if (!section.TryGetValue(pairKey, out string? value))
 			throw new KeyNotFoundException($"Key \"{pairKey}\" not found in section \"{sectionKey}\" of \"{FilePath}\".");
 		return value;
 	}

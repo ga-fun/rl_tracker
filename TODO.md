@@ -10,3 +10,7 @@ In `UpdateState` if `bReplay == true` => ignore it
 1. Path standard
 2. From manifest
 3. Fallback paths
+
+# Flow
+
+1. Load `Core.Config`

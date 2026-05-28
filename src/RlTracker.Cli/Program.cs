@@ -1,9 +1,20 @@
-﻿namespace RlTracker.Cli;
+﻿using RlTracker.Core;
 
-class Program
+namespace RlTracker.Cli;
+
+internal static class Program
 {
-    static void Main(string[] args)
-    {
-        Console.WriteLine("Hello, World!");
-    }
+	private const int ExitSuccess = 0;
+	private const int ExitFailure = 1;
+ 
+	private static int Main(string[] args)
+	{
+		Console.WriteLine($"{Log.Blue}[RlTracker.Cli.Program.Main()]{Log.Reset}");
+		Config config;
+
+		config = Config.Load();
+		Console.WriteLine($"Test emojis: {config.WpfConfig.WinPrefix} | {config.WpfConfig.LossPrefix} | {config.WpfConfig.WinStreakPrefix} | {config.WpfConfig.LossStreakPrefix}.");
+
+		return (ExitSuccess);
+	}
 }

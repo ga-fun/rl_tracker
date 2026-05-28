@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.Globalization;
 using System.Net;
 using FileIni;
@@ -24,6 +25,12 @@ public sealed class Config(int? port, double? packetSendRate)
 
 	public int Port { get; } = NormalizePort(port);
 	public double PacketSendRate { get; } = NormalizePacketSendRate(packetSendRate);
+
+	[JsonConstructor]
+	public Config(int port, double packetSendRate)
+		: this((int?)port, (double?)packetSendRate)
+	{
+	}
 
 	public void Apply(string rlInstallDir, ref bool rlNeedRestart)
 	{

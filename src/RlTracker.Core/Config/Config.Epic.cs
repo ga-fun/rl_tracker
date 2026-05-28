@@ -1,8 +1,8 @@
 using System.Text.Json;
 
-namespace RlTracker.Core.Config;
+namespace RlTracker.Core;
 
-internal sealed partial class Config
+public sealed partial class Config
 {
 	private const string EpicGamesDirName = "Epic Games";
 	private const string EpicRlDirName = "rocketleague";
@@ -17,18 +17,34 @@ internal sealed partial class Config
 
 	public static string? FindEpicRlInstallDir()
 	{
-		string? manifestInstallDir = FindEpicRlInstallDirFromManifests();
-
-		if (manifestInstallDir != null)
-			return manifestInstallDir;
-		foreach (string epicRoot in GetEpicRootCandidates())
+		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.FindEpicRlInstallDir()]{Log.Reset}");
+		try
 		{
-			string installDir = Path.Combine(epicRoot, EpicRlDirName);
+			string? installDir = FindEpicRlInstallDirFromManifests();
 
-			if (IsRlInstallDir(installDir))
+			if (installDir != null)
+			{
+				Console.WriteLine($"{Log.Green}Epic RL dir (from manifests): {Log.Yellow}{installDir}.{Log.Reset}");
 				return installDir;
+			}
+			foreach (string epicRoot in GetEpicRootCandidates())
+			{
+				installDir = Path.Combine(epicRoot, EpicRlDirName);
+
+				if (IsRlInstallDir(installDir))
+				{
+					Console.WriteLine($"{Log.Green}Epic RL dir (from classic paths): {Log.Yellow}{installDir}.{Log.Reset}");
+					return installDir;
+				}
+			}
+			Console.WriteLine($"{Log.Red}Epic RL dir not found.{Log.Reset}");
+			return null;
 		}
-		return null;
+		catch (Exception exception)
+		{
+			Console.WriteLine($"{Log.Red}Exception: {exception.Message}.{Log.Reset}");
+			return null;
+		}
 	}
 
 	private static string? FindEpicRlInstallDirFromManifests()

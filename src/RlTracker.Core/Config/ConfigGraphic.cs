@@ -1,6 +1,6 @@
-namespace RlTracker.Core.Config;
+namespace RlTracker.Core;
 
-internal sealed class ConfigGraphic
+public sealed class ConfigGraphic
 {
 	private const string WinPrefixDefault = "✅";
 	private const string LossPrefixDefault = "❌";

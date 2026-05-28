@@ -1,8 +1,8 @@
 using System.Text.Json;
 
-namespace RlTracker.Core.Config;
+namespace RlTracker.Core;
 
-internal sealed partial class Config
+public sealed partial class Config
 {
 	private static readonly string ConfigFile = Path.Combine(
 		Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -35,22 +35,40 @@ internal sealed partial class Config
 
 	public static Config Load()
 	{
+		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.Load()]{Log.Reset}");
+		Console.WriteLine($"Core Config file location: {Log.Yellow}{ConfigFile}{Log.Reset}");
+		Console.WriteLine("Loading...");
 		if (!File.Exists(ConfigFile))
+		{
+			Console.WriteLine($"{Log.Yellow}Core Config file not found at \"{ConfigFile}\".{Log.Reset}");
 			return CreateDefault();
+		}
 		try
 		{
 			string json = File.ReadAllText(ConfigFile);
-			return JsonSerializer.Deserialize<Config>(json, JsonOptions)
-				?? CreateDefault();
+			Config? configMaybe = JsonSerializer.Deserialize<Config>(json, JsonOptions);
+			if (configMaybe != null)
+			{
+				Console.WriteLine($"{Log.Green}Core Config parsed:{Log.Reset}");
+				Log.Dump(configMaybe);
+				return configMaybe;
+			}
+			else
+			{
+				Console.WriteLine($"{Log.Red}Core Config not parsed (null).{Log.Reset}");
+				return CreateDefault();
+			}
 		}
-		catch
+		catch (Exception exception)
 		{
+			Console.WriteLine($"{Log.Red}Core Config parsing error: {exception.Message}.{Log.Reset}");
 			return CreateDefault();
 		}
 	}
 
 	public void Apply(out bool rlNeedRestart)
 	{
+		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.Apply()]{Log.Reset}");
 		if (EpicRlInstallDir == null && SteamRlInstallDir == null)
 			throw new InvalidOperationException("Epic and/or Steam install dir must be set before applying config.");
 
@@ -64,16 +82,24 @@ internal sealed partial class Config
 
 	public void Save()
 	{
+		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.Save()]{Log.Reset}");
 		string? directory = Path.GetDirectoryName(ConfigFile);
 
 		if (!string.IsNullOrWhiteSpace(directory))
+		{
+			Console.WriteLine($"Creating dir: \"{Log.Yellow}{directory}{Log.Reset}\"...");
 			Directory.CreateDirectory(directory);
+		}
 		string json = JsonSerializer.Serialize(this, JsonOptions);
+		Console.WriteLine("Serialized data:");
+		Console.WriteLine(json);
 		File.WriteAllText(ConfigFile, json);
+		Console.WriteLine($"{Log.Green}Saved.{Log.Reset}");
 	}
 
 	private static Config CreateDefault()
 	{
+		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.CreateDefault()]{Log.Reset}");
 		Config config = new()
 		{
 			EpicRlInstallDir = FindEpicRlInstallDir(),

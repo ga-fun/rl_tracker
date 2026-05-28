@@ -1,6 +1,6 @@
-namespace RlTracker.Core.Config;
+namespace RlTracker.Core;
 
-internal sealed partial class Config
+public sealed partial class Config
 {
 	private const string SteamDirName = "Steam";
 	private const string SteamLibraryDirName = "SteamLibrary";
@@ -19,13 +19,27 @@ internal sealed partial class Config
 
 	public static string? FindSteamRlInstallDir()
 	{
+		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.FindSteamRlInstallDir()]{Log.Reset}");
 		try
 		{
-			return FindSteamRlInstallDirFromManifests()
-				?? FindSteamRlInstallDirFromClassicPaths();
+			string? res = FindSteamRlInstallDirFromManifests();
+			if (res != null)
+			{
+				Console.WriteLine($"{Log.Green}Steam RL dir (from manifests): {Log.Yellow}{res}.{Log.Reset}");
+				return res;
+			}
+			res = FindSteamRlInstallDirFromClassicPaths();
+			if (res != null)
+			{
+				Console.WriteLine($"{Log.Green}Steam RL dir (from classic paths): {Log.Yellow}{res}.{Log.Reset}");
+				return res;
+			}
+			Console.WriteLine($"{Log.Red}Steam RL dir not found.{Log.Reset}");
+			return null;
 		}
-		catch
+		catch (Exception exception)
 		{
+			Console.WriteLine($"{Log.Red}Exception: {exception.Message}.{Log.Reset}");
 			return null;
 		}
 	}
