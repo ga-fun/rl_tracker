@@ -4,8 +4,12 @@ using FileIni;
 
 namespace RlStatsApi;
 
-public static class Config
+public sealed class Config(int? port, double? packetSendRate)
 {
+	public static readonly string ConfigFileRelativePath = Path.Combine(
+		"TAGame",
+		"Config",
+		"DefaultStatsAPI.ini");
 	public const int PortDefault = 49123;
 	public const int PortMin = 1;
 	public const int PortMax = IPEndPoint.MaxPort;
@@ -14,60 +18,23 @@ public static class Config
 	public const double PacketSendRateMin = 0;
 	public const double PacketSendRateMax = 120;
 
-	private static readonly string ConfigFileRelativePath = Path.Combine(
-		"TAGame",
-		"Config",
-		"DefaultStatsAPI.ini");
 	private const string Section = "TAGame.MatchStatsExporter_TA";
 	private const string PortKey = "Port";
 	private const string PacketSendRateKey = "PacketSendRate";
 
-	public static bool IsValid(int? port, double? packetSendRate, string rlInstallDir)
+	public int Port { get; } = NormalizePort(port);
+	public double PacketSendRate { get; } = NormalizePacketSendRate(packetSendRate);
+
+	public void Apply(string rlInstallDir, ref bool rlNeedRestart)
 	{
 		IniFile configFile = GetConfigFile(rlInstallDir);
-		int normalizedPort = NormalizePort(port);
-		double normalizedPacketSendRate = NormalizePacketSendRate(packetSendRate);
 
-		try
-		{
-			return CheckConfigValues(normalizedPort, normalizedPacketSendRate, configFile);
-		}
-		catch (Exception exception)
-			when (
-				exception is KeyNotFoundException
-				|| exception is FormatException
-				|| exception is OverflowException
-			)
-		{
-			return false;
-		}
-	}
-
-	public static void Apply(int? port, double? packetSendRate, string rlInstallDir)
-	{
-		IniFile configFile = GetConfigFile(rlInstallDir);
-		int normalizedPort = NormalizePort(port);
-		double normalizedPacketSendRate = NormalizePacketSendRate(packetSendRate);
-
-		configFile.Set(Section, PortKey, normalizedPort.ToString(CultureInfo.InvariantCulture));
-		configFile.Set(Section, PacketSendRateKey, normalizedPacketSendRate.ToString(CultureInfo.InvariantCulture));
+		if (IsApplied(configFile))
+			return;
+		configFile.Set(Section, PortKey, Port.ToString(CultureInfo.InvariantCulture));
+		configFile.Set(Section, PacketSendRateKey, PacketSendRate.ToString(CultureInfo.InvariantCulture));
 		configFile.Write();
-	}
-
-	private static IniFile GetConfigFile(string rlInstallDir)
-	{
-		ArgumentException.ThrowIfNullOrWhiteSpace(rlInstallDir);
-		string trimmedDir = rlInstallDir.Trim();
-		if (!Directory.Exists(trimmedDir))
-			throw new DirectoryNotFoundException($"Rocket League install dir does not exist: \"{trimmedDir}\".");
-		
-		string configFilePath = Path.Combine(trimmedDir, ConfigFileRelativePath);
-		if (!File.Exists(configFilePath))
-			throw new FileNotFoundException($"Rocket League API config file not found: \"{configFilePath}\".", configFilePath);
-		
-		IniFile configFile = new(configFilePath);
-		configFile.Read();
-		return configFile;
+		rlNeedRestart = true;
 	}
 
 	private static int NormalizePort(int? port)
@@ -91,26 +58,59 @@ public static class Config
 			throw new ArgumentOutOfRangeException(
 				nameof(packetSendRate),
 				packetSendRate,
-				$"Invalid packetSendRate {packetSendRate}: must be finite.");
+				$"Invalid packet send rate {packetSendRate}: must be finite.");
 		if (packetSendRate < PacketSendRateMin || packetSendRate > PacketSendRateMax)
 			throw new ArgumentOutOfRangeException(
 				nameof(packetSendRate),
 				packetSendRate,
-				$"Invalid packetSendRate {packetSendRate}: must be between {PacketSendRateMin} and {PacketSendRateMax} (inclusive)."
+				$"Invalid packet send rate {packetSendRate}: must be between {PacketSendRateMin} and {PacketSendRateMax} (inclusive)."
 			);
 		return packetSendRate.Value;
 	}
 
-	private static bool CheckConfigValues(int port, double packetSendRate, IniFile configFile)
+	private static IniFile GetConfigFile(string rlInstallDir)
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(rlInstallDir);
+		string trimmedDir = rlInstallDir.Trim();
+		if (!Directory.Exists(trimmedDir))
+			throw new DirectoryNotFoundException($"Rocket League install dir does not exist: \"{trimmedDir}\".");
+		
+		string configFilePath = Path.Combine(trimmedDir, ConfigFileRelativePath);
+		if (!File.Exists(configFilePath))
+			throw new FileNotFoundException($"Rocket League API config file not found: \"{configFilePath}\".", configFilePath);
+		
+		IniFile configFile = new(configFilePath);
+		configFile.Read();
+		return configFile;
+	}
+
+	private bool IsApplied(IniFile configFile)
+	{
+		try
+		{
+			return CheckConfigValues(configFile);
+		}
+		catch (Exception exception)
+			when (
+				exception is KeyNotFoundException
+				|| exception is FormatException
+				|| exception is OverflowException
+			)
+		{
+			return false;
+		}
+	}
+
+	private bool CheckConfigValues(IniFile configFile)
 	{
 		string portString = configFile.Get(Section, PortKey);
 		int currentPort = int.Parse(portString, CultureInfo.InvariantCulture);
-		if (currentPort != port)
+		if (currentPort != Port)
 			return false;
 		
 		string packetSendRateString = configFile.Get(Section, PacketSendRateKey);
 		double currentPacketSendRate = double.Parse(packetSendRateString, CultureInfo.InvariantCulture);
-		if (currentPacketSendRate != packetSendRate)
+		if (currentPacketSendRate != PacketSendRate)
 			return false;
 		
 		return true;
