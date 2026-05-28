@@ -9,6 +9,7 @@ internal static class Program
  
 	private static int Main(string[] args)
 	{
+		Console.OutputEncoding = System.Text.Encoding.UTF8;
 		Console.WriteLine($"{Log.Blue}[RlTracker.Cli.Program.Main()]{Log.Reset}");
 		Config config;
 
