@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class PayloadBallHit(
+public sealed class PayloadBallHit(
 	string? matchGuid,
 	List<PlayerRef>? players,
 	BallHitBall? ball

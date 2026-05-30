@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace RlStatsApi;
 
-internal sealed class Game(
+public sealed class Game(
 	List<Team>? teams,
 	int? timeSeconds,
 	bool? bOvertime,

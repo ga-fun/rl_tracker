@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class Ball(
+public sealed class Ball(
 	double? speed,
 	int? teamNum
 )

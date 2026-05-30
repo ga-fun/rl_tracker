@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class BallHitBall(
+public sealed class BallHitBall(
 	double? preHitSpeed,
 	double? postHitSpeed,
 	Vector? location

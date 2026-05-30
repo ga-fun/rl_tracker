@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class PayloadGoalScored(
+public sealed class PayloadGoalScored(
 	string? matchGuid,
 	double? goalSpeed,
 	double? goalTime,

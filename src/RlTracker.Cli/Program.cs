@@ -4,18 +4,29 @@ namespace RlTracker.Cli;
 
 internal static class Program
 {
-	private const int ExitSuccess = 0;
-	private const int ExitFailure = 1;
- 
-	private static int Main(string[] args)
+	private const int _exitSuccess = 0;
+	private const int _exitFailure = 1;
+
+	private static async Task<int> Main(string[] args)
 	{
 		Console.OutputEncoding = System.Text.Encoding.UTF8;
-		Console.WriteLine($"{Log.Blue}[RlTracker.Cli.Program.Main()]{Log.Reset}");
-		Config config;
+		Driver driver = Driver.Instance;
 
-		config = Config.Load();
-		Console.WriteLine($"Test emojis: {config.WpfConfig.WinPrefix} | {config.WpfConfig.LossPrefix} | {config.WpfConfig.WinStreakPrefix} | {config.WpfConfig.LossStreakPrefix}.");
+		Console.CancelKeyPress += async (_, eventArgs) =>
+		{
+			eventArgs.Cancel = true;
+			await driver.Stop();
+		};
 
-		return (ExitSuccess);
+		try
+		{
+			await driver.Start();
+		}
+		catch (Exception exception)
+		{
+			Console.WriteLine($"${Log.Red}❌ ERROR: {Log.Yellow}{exception.Message}{Log.Reset}");
+			return _exitFailure;
+		}
+		return _exitSuccess;
 	}
 }

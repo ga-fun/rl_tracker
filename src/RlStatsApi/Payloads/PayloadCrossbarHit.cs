@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class PayloadCrossbarHit(
+public sealed class PayloadCrossbarHit(
 	string? matchGuid,
 	Vector? ballLocation,
 	double? ballSpeed,

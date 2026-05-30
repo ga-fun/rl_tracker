@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class PayloadStatfeedEvent(
+public sealed class PayloadStatfeedEvent(
 	string? eventName,
 	string? type,
 	PlayerRef? mainTarget,

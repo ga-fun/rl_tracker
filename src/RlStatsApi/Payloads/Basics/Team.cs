@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class Team(
+public sealed class Team(
 	string? name,
 	int? teamNum,
 	int? score,

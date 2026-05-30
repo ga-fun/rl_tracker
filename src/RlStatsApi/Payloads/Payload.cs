@@ -1,5 +1,5 @@
 namespace RlStatsApi;
 
-internal abstract class Payload
+public abstract class Payload
 {
 }

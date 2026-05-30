@@ -1,5 +1,6 @@
 namespace RlTracker.Core;
 
+// TODO: move it to RlTracker.Wpf.Config
 public sealed class ConfigGraphic
 {
 	private const string WinPrefixDefault = "✅";

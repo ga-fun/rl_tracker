@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class PayloadUpdateState(
+public sealed class PayloadUpdateState(
 	string? matchGuid,
 	List<Player>? players,
 	Game? game

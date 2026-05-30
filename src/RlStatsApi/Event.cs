@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace RlStatsApi;
 
-internal sealed class Event
+public sealed class Event
 {
 	public Type Type { get; }
 	public Payload Payload { get; }

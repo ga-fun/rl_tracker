@@ -17,18 +17,18 @@ public sealed partial class Config
 		SteamCommonDirName,
 		SteamRlDirName);
 
-	public static string? FindSteamRlInstallDir()
+	public static string? FindSteamRlDir()
 	{
-		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.FindSteamRlInstallDir()]{Log.Reset}");
+		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.FindSteamRlDir()]{Log.Reset}");
 		try
 		{
-			string? res = FindSteamRlInstallDirFromManifests();
+			string? res = FindSteamRlDirFromManifests();
 			if (res != null)
 			{
 				Console.WriteLine($"{Log.Green}Steam RL dir (from manifests): {Log.Yellow}{res}.{Log.Reset}");
 				return res;
 			}
-			res = FindSteamRlInstallDirFromClassicPaths();
+			res = FindSteamRlDirFromClassicPaths();
 			if (res != null)
 			{
 				Console.WriteLine($"{Log.Green}Steam RL dir (from classic paths): {Log.Yellow}{res}.{Log.Reset}");
@@ -44,13 +44,13 @@ public sealed partial class Config
 		}
 	}
 
-	private static string? FindSteamRlInstallDirFromManifests()
+	private static string? FindSteamRlDirFromManifests()
 	{
 		foreach (string steamRoot in GetSteamRootCandidates())
 		{
 			foreach (string libraryRoot in GetSteamLibraryCandidates(steamRoot))
 			{
-				string? installDir = FindSteamRlInstallDirFromManifest(libraryRoot);
+				string? installDir = FindSteamRlDirFromManifest(libraryRoot);
 
 				if (installDir != null)
 					return installDir;
@@ -59,7 +59,7 @@ public sealed partial class Config
 		return null;
 	}
 
-	private static string? FindSteamRlInstallDirFromClassicPaths()
+	private static string? FindSteamRlDirFromClassicPaths()
 	{
 		foreach (string steamRoot in GetSteamRootCandidates())
 		{
@@ -71,7 +71,7 @@ public sealed partial class Config
 		return null;
 	}
 
-	private static string? FindSteamRlInstallDirFromManifest(string libraryRoot)
+	private static string? FindSteamRlDirFromManifest(string libraryRoot)
 	{
 		string manifestFile = Path.Combine(
 			libraryRoot,

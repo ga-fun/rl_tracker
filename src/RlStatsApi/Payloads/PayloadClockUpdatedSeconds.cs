@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace RlStatsApi;
 
-internal sealed class PayloadClockUpdatedSeconds(
+public sealed class PayloadClockUpdatedSeconds(
 	string? matchGuid,
 	int? timeSeconds,
 	bool? bOvertime) : Payload

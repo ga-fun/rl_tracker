@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal sealed class PayloadMatchEnded(
+public sealed class PayloadMatchEnded(
 	string?	matchGuid,
 	int? winnerTeamNum) : Payload
 {

@@ -15,12 +15,12 @@ public sealed partial class Config
 		"Data",
 		"Manifests");
 
-	public static string? FindEpicRlInstallDir()
+	public static string? FindEpicRlDir()
 	{
-		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.FindEpicRlInstallDir()]{Log.Reset}");
+		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.FindEpicRlDir()]{Log.Reset}");
 		try
 		{
-			string? installDir = FindEpicRlInstallDirFromManifests();
+			string? installDir = FindEpicRlDirFromManifests();
 
 			if (installDir != null)
 			{
@@ -47,7 +47,7 @@ public sealed partial class Config
 		}
 	}
 
-	private static string? FindEpicRlInstallDirFromManifests()
+	private static string? FindEpicRlDirFromManifests()
 	{
 		if (!Directory.Exists(EpicManifestsDir))
 			return null;

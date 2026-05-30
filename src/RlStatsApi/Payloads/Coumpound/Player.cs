@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace RlStatsApi;
 
-internal sealed class Player(
+public sealed class Player(
 	string? name,
 	string? primaryId,
 	int? shortcut,

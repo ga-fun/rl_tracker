@@ -1,6 +1,6 @@
 namespace RlStatsApi;
 
-internal enum Type
+public enum Type
 {
 	UpdateState,
 	BallHit,
