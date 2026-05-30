@@ -1,0 +1,71 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "RlTracker.Cli/1.0.0": {
+        "dependencies": {
+          "RlTracker.Core": "1.0.0"
+        },
+        "runtime": {
+          "RlTracker.Cli.dll": {}
+        }
+      },
+      "FileIni/1.0.0": {
+        "runtime": {
+          "FileIni.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "RlStatsApi/1.0.0": {
+        "dependencies": {
+          "FileIni": "1.0.0"
+        },
+        "runtime": {
+          "RlStatsApi.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "RlTracker.Core/1.0.0": {
+        "dependencies": {
+          "RlStatsApi": "1.0.0"
+        },
+        "runtime": {
+          "RlTracker.Core.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "RlTracker.Cli/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FileIni/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "RlStatsApi/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "RlTracker.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -11,21 +11,30 @@ internal static class Program
 	{
 		Console.OutputEncoding = System.Text.Encoding.UTF8;
 		Driver driver = Driver.Instance;
+		CancellationTokenSource source = new();
 
-		Console.CancelKeyPress += async (_, eventArgs) =>
+		Console.CancelKeyPress += (_, eventArgs) =>
 		{
 			eventArgs.Cancel = true;
-			await driver.Stop();
+			source.Cancel();
 		};
 
 		try
 		{
 			await driver.Start();
+			await Task.Delay(Timeout.Infinite, source.Token);
+		}
+		catch (OperationCanceledException)
+		{
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"${Log.Red}❌ ERROR: {Log.Yellow}{exception.Message}{Log.Reset}");
+			Console.WriteLine($"{Log.Red}❌ ERROR: {Log.Yellow}{exception.Message}{Log.Reset}");
 			return _exitFailure;
+		}
+		finally
+		{
+			await driver.Stop();
 		}
 		return _exitSuccess;
 	}

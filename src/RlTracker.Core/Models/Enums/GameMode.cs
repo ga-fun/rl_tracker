@@ -5,5 +5,6 @@ public enum GameMode
 	OneVersusOne,
 	TwoVersusTwo,
 	ThreeVersusThree,
-	Other
+	Other,
+	Count
 }

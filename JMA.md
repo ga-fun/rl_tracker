@@ -16,6 +16,8 @@ Driver
 	└ Client
 ```
 
+> Surtout pour les `Models` : d'après le Chat : inner class si "ne fait de sens qu'au sein de la classe" => Donc tous les models sont des inner class de `State` ?!
+
 ## Classes "énormes"
 
 > 🤮 Exemple classe volumineuse : `RlTracker.Core` -> `Config` : split recherche Epic/Steam dans des classes statiques ?

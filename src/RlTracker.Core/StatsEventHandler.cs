@@ -2,10 +2,17 @@ using RlStatsApi;
 
 namespace RlTracker.Core;
 
-// TODO: Print messages/sec treatment speed (every 10 sec)
+// TODO: rename
 
 internal sealed class StatsEventHandler
 {
+	private const long SpeedPrintDelaySec = 10;
+	public double MessagePerSec { get; private set; } = 0;
+	private long? _timeStartSec = null;
+	private long? _timeCurrSec = null;
+	private long _messageCount = 0;
+	private long _timeLastSpeedPrint = 0;
+
 	// TODO
 	internal void HandleEvent(Event apiEvent)
 	{
@@ -24,6 +31,21 @@ internal sealed class StatsEventHandler
 		if (apiEvent.Type == RlStatsApi.Type.MatchDestroyed)
 		{
 			// TODO
+		}
+		UpdateSpeed();
+	}
+
+	private void UpdateSpeed()
+	{
+		if (_timeStartSec == null)
+			_timeStartSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		_timeCurrSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		_messageCount++;
+		MessagePerSec = _messageCount / (double)(_timeCurrSec - _timeStartSec);
+		if (_timeCurrSec - _timeLastSpeedPrint >= 10)
+		{
+			Console.WriteLine($"{Log.Yellow}===> [{MessagePerSec}/sec] <==={Log.Reset}");
+			_timeLastSpeedPrint = _timeCurrSec.Value;
 		}
 	}
 }
