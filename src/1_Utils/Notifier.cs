@@ -1,15 +1,14 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace RlTracker.Core;
+namespace GuillaumeAst.Utils;
 
 public abstract class Notifier : INotifyPropertyChanged
 {
 	public event PropertyChangedEventHandler? PropertyChanged;
 
-	protected void NotifyChange([CallerMemberName] string? propertyName = null)
+	protected void NotifyChange([CallerMemberName] string propertyName = "")
 	{
-		ArgumentNullException.ThrowIfNull(propertyName);
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
 }

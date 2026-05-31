@@ -1,5 +1,54 @@
 # REFACTOR
 
+- ⚠️ `Connection/Client` => Exceptions custom pour différencier si ça vaut le coup de retry ou non
+- ⚠️ `Connection/Manager` => ne pas catch toutes les exceptions !! (OOM par exemple doit remonter !!)
+
+- Namespaces `GuillaumeAst.`:
+```cs
+// Au lieu de
+namespace MyNameSpace;
+// Plutôt faire
+namespace GuillaumeAst.MyNameSpace;
+```
+
+- Ne pas `throw` si le call system le fait déjà:
+```cs
+// Au lieu de
+if (!File.Exists(file))
+{
+	throw new FileNotFoundException(...);
+}
+string content = File.ReadAllText(file);
+// Plutôt faire
+string content = File.ReadAllText(file);
+```
+
+- Accolades sur les `if`, les boucles etc:
+```cs
+// Au lieu de 
+if (true)
+	DoThis();
+// Plutôt faire
+if (true)
+{
+	DoThis();
+}
+```
+
+- Ne **JAMAIS** faire de catch **global**:
+```cs
+// Ne pas faire
+try
+{...}
+catch
+{...}
+// Ni
+try
+{...}
+catch (Exception exception)
+{...}
+```
+
 ## STRUCTURE FUTURE
 
 > **PUB**: Expose public API

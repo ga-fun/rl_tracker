@@ -1,37 +1,53 @@
-namespace FileIni;
+namespace GuillaumeAst.FileIni;
 
-public sealed partial class IniFile(string filePath)
+public sealed class IniFile(string filePath)
 {
-	private const string GlobalSection = "";
-	private readonly Dictionary<string, Dictionary<string, string>> _content = [];
-	
-	public string FilePath { get; } = NormalizeFilePath(filePath);
+	public string FilePath { get; } = Normalizer.NormalizeFilePath(filePath);
+	internal readonly Dictionary<string, Dictionary<string, string>> Content = [];
+
+	public static IniFile Read(string filePath)
+	{
+		return Reader.Read(filePath);
+	}
+
+	public void Write()
+	{
+		Writer.Write(this);
+	}
 
 	public void Set(string? sectionName, string key, string value)
 	{
-		string sectionKey = NormalizeSection(sectionName);
-		string pairKey = NormalizeKey(key);
-		string pairValue = NormalizeValue(value);
+		string sectionKey = Normalizer.NormalizeSection(sectionName);
+		string pairKey = Normalizer.NormalizeKey(key);
+		string pairValue = Normalizer.NormalizeValue(value);
 
 		EnsureSection(sectionKey);
-		_content[sectionKey][pairKey] = pairValue;
+		Content[sectionKey][pairKey] = pairValue;
 	}
 
 	public string Get(string? sectionName, string key)
 	{
-		string sectionKey = NormalizeSection(sectionName);
-		string pairKey = NormalizeKey(key);
+		string sectionKey = Normalizer.NormalizeSection(sectionName);
+		string pairKey = Normalizer.NormalizeKey(key);
 
-		if (!_content.TryGetValue(sectionKey, out Dictionary<string, string>? section))
+		if (!Content.TryGetValue(sectionKey, out Dictionary<string, string>? section))
+		{
 			throw new KeyNotFoundException($"Section \"{sectionKey}\" not found in \"{FilePath}\".");
+		}
 		if (!section.TryGetValue(pairKey, out string? value))
+		{
 			throw new KeyNotFoundException($"Key \"{pairKey}\" not found in section \"{sectionKey}\" of \"{FilePath}\".");
+		}
 		return value;
 	}
 
-	private void EnsureSection(string sectionKey)
+	internal void EnsureSection(string sectionName)
 	{
-		if (!_content.ContainsKey(sectionKey))
-			_content[sectionKey] = [];
+		string sectionKey = Normalizer.NormalizeSection(sectionName);
+
+		if (!Content.ContainsKey(sectionKey))
+		{
+			Content[sectionKey] = [];
+		}
 	}
 }

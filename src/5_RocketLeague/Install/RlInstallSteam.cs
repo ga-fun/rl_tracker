@@ -1,3 +1,6 @@
+using GuillaumeAst.Utils;
+using GuillaumeAst.FileVdf;
+
 namespace RlTracker.Core;
 
 public sealed class RlInstallSteam(string? installDir) : RlInstall(installDir)
@@ -116,35 +119,5 @@ public sealed class RlInstallSteam(string? installDir) : RlInstall(installDir)
 			if (TryReadVdfValue(line, SteamVdfPathKey, out string path))
 				yield return path;
 		}
-	}
-
-	private static string? ReadVdfValueFromFile(string filePath, string key)
-	{
-		foreach (string line in File.ReadLines(filePath))
-		{
-			if (TryReadVdfValue(line, key, out string value))
-				return value;
-		}
-		return null;
-	}
-
-	private static bool TryReadVdfValue(string line, string key, out string value)
-	{
-		string trimmed = line.Trim();
-		string prefix = $"\"{key}\"";
-		int start;
-		int end;
-
-		value = "";
-		if (!trimmed.StartsWith(prefix, StringComparison.Ordinal))
-			return false;
-		start = trimmed.IndexOf('"', prefix.Length);
-		if (start < 0)
-			return false;
-		end = trimmed.IndexOf('"', start + 1);
-		if (end < 0)
-			return false;
-		value = trimmed[(start + 1)..end].Replace(@"\\", @"\").Trim();
-		return value.Length > 0;
 	}
 }

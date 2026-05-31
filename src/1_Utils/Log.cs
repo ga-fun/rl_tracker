@@ -1,11 +1,11 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
-namespace RlTracker.Core;
+namespace GuillaumeAst.Utils;
 
 public static class Log
 {
-	private static readonly JsonSerializerOptions JsonOptions = new(){ WriteIndented = true };
+	private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 	public const string Green = "\u001b[32m";
 	public const string Blue = "\u001b[34m";
 	public const string Red = "\u001b[31m";
@@ -22,12 +22,12 @@ public static class Log
 		string label = message ?? "Dump:";
 		string dump;
 	
-		PrintPriv(caller, file, line, label);
+		PrintInternal(caller, file, line, label);
 		try
 		{
 			dump = JsonSerializer.Serialize(value, JsonOptions);
 		}
-		catch (Exception exception)
+		catch (NotSupportedException exception)
 		{
 			dump = $"Exception while serializing: {exception.Message}";
 		}
@@ -40,7 +40,7 @@ public static class Log
 		[CallerFilePath] string file = "",
 		[CallerLineNumber] int line = 0)
 	{
-		PrintPriv(caller, file, line, message);
+		PrintInternal(caller, file, line, message);
 	}
 
 	public static void PrintGreen(
@@ -49,7 +49,7 @@ public static class Log
 		[CallerFilePath] string file = "",
 		[CallerLineNumber] int line = 0)
 	{
-		PrintPriv(caller, file, line, Green + message);
+		PrintInternal(caller, file, line, Green + message);
 	}
 
 	public static void PrintBlue(
@@ -58,7 +58,7 @@ public static class Log
 		[CallerFilePath] string file = "",
 		[CallerLineNumber] int line = 0)
 	{
-		PrintPriv(caller, file, line, Blue + message);
+		PrintInternal(caller, file, line, Blue + message);
 	}
 
 	public static void PrintRed(
@@ -67,7 +67,7 @@ public static class Log
 		[CallerFilePath] string file = "",
 		[CallerLineNumber] int line = 0)
 	{
-		PrintPriv(caller, file, line, Red + message);
+		PrintInternal(caller, file, line, Red + message);
 	}
 
 	public static void PrintYellow(
@@ -76,12 +76,12 @@ public static class Log
 		[CallerFilePath] string file = "",
 		[CallerLineNumber] int line = 0)
 	{
-		PrintPriv(caller, file, line, Yellow + message);
+		PrintInternal(caller, file, line, Yellow + message);
 	}
 
-	private static void PrintPriv(string caller, string file, int line, string message)
+	private static void PrintInternal(string caller, string file, int line, string message)
 	{
-		string filename = Path.GetFileName(file);
-		Console.WriteLine($"[{filename}:{line}:{caller}] {message}{Reset}");
+		string fileName = Path.GetFileName(file);
+		Console.WriteLine($"[{fileName}:{line}:{caller}] {message}{Reset}");
 	}
 }
