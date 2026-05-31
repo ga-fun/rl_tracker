@@ -1,5 +1,9 @@
 # JMA
 
+-> Bon usage de inner class dans `ConnectionManager` (inner class == `Connection`) ?
+
+---
+
 1. Enums / Inner class
 2. Attributs statiques
 3. Attributs public
