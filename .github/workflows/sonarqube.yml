@@ -37,6 +37,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
+            -Dsonar.organization=ga-fun
             -Dsonar.projectKey=${{ github.repository }}
             -Dsonar.projectName=${{ github.repository }}
             -Dsonar.sources=src
