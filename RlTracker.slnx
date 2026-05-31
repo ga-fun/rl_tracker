@@ -1,12 +1,27 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Connection/Connection.csproj" />
-    <Project Path="src/FileIni/FileIni.csproj" />
-    <Project Path="src/FileVdf/FileVdf.csproj" />
-    <Project Path="src/RlTracker.Driver/RlTracker.Driver.csproj" />
-    <Project Path="src/RlTracker.Settings/RlTracker.Settings.csproj" />
-    <Project Path="src/RlTracker.Ui/RlTracker.Ui.csproj" />
-    <Project Path="src/RocketLeague/RocketLeague.csproj" />
-    <Project Path="src/Utils/Utils.csproj" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/1_Utils/">
+    <Project Path="src/1_Utils/Utils.csproj" />
+  </Folder>
+  <Folder Name="/src/2_FileVdf/">
+    <Project Path="src/2_FileVdf/FileVdf.csproj" />
+  </Folder>
+  <Folder Name="/src/3_FileIni/">
+    <Project Path="src/3_FileIni/FileIni.csproj" />
+  </Folder>
+  <Folder Name="/src/4_Connection/">
+    <Project Path="src/4_Connection/Connection.csproj" />
+  </Folder>
+  <Folder Name="/src/5_RocketLeague/">
+    <Project Path="src/5_RocketLeague/RocketLeague.csproj" />
+  </Folder>
+  <Folder Name="/src/6_RlTracker.Settings/">
+    <Project Path="src/6_RlTracker.Settings/RlTracker.Settings.csproj" />
+  </Folder>
+  <Folder Name="/src/7_RlTracker.Driver/">
+    <Project Path="src/7_RlTracker.Driver/RlTracker.Driver.csproj" />
+  </Folder>
+  <Folder Name="/src/8_RlTracker.Ui/">
+    <Project Path="src/8_RlTracker.Ui/RlTracker.Ui.csproj" />
   </Folder>
 </Solution>
