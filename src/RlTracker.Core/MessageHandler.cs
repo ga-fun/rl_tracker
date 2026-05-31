@@ -44,7 +44,7 @@ internal sealed class MessageHandler
 		MessagePerSec = _messageCount / (double)(_timeCurrSec - _timeStartSec);
 		if (_timeCurrSec - _timeLastSpeedPrint >= 10)
 		{
-			Console.WriteLine($"{Log.Yellow}===> [{MessagePerSec}/sec] <==={Log.Reset}");
+			Log.PrintBlue($"===> [{MessagePerSec}/sec] <===");
 			_timeLastSpeedPrint = _timeCurrSec.Value;
 		}
 	}

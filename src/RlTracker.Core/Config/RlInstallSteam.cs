@@ -21,13 +21,13 @@ public sealed class RlInstallSteam(string? installDir) : RlInstall(installDir)
 		try
 		{
 			if (TryFindFromManifests() || TryFindFromClassicPaths())
-				Console.WriteLine($"{Log.Green}RL Steam dir found atuomatically: {Log.Yellow}{InstallDir}.{Log.Reset}");
+				Log.PrintGreen($"RL Steam dir found atuomatically: {Log.Blue}\"{InstallDir}.");
 			else
-				Console.WriteLine($"{Log.Red}RL Steam dir not found atuomatically.{Log.Reset}");
+				Log.PrintYellow("RL Steam dir not found atuomatically.");
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"{Log.Red}Exception while searching RL Steam dir: {exception.Message}.{Log.Reset}");
+			Log.PrintRed($"Exception while searching RL Steam dir: {exception.Message}.");
 		}
 	}
 

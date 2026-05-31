@@ -20,13 +20,13 @@ public sealed class RlInstallEpic(string? installDir) : RlInstall(installDir)
 		try
 		{
 			if (TryFindFromManifests() || TryFindFromClassicPaths())
-				Console.WriteLine($"{Log.Green}RL Epic dir found atuomatically: {Log.Yellow}{InstallDir}.{Log.Reset}");
+				Log.PrintGreen($"RL Epic dir found atuomatically: {Log.Blue}\"{InstallDir}\".");
 			else
-				Console.WriteLine($"{Log.Red}RL Epic dir not found atuomatically.{Log.Reset}");
+				Log.PrintYellow("RL Epic dir not found atuomatically.");
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"{Log.Red}Exception while searching RL Epic dir: {exception.Message}.{Log.Reset}");
+			Log.PrintRed($"RL Epic dir search failed: {exception.Message}.");
 		}
 	}
 

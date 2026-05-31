@@ -26,7 +26,7 @@ internal sealed class ConnectionManager
 		if (_listeningTask != null)
 			return;
 		
-		Console.WriteLine("Connecting...");
+		Log.Print("Connecting...");
 		_onConnect = onConnect;
 		_onMessage = onMessage;
 		_onDisconnect = onDisconnect;
@@ -36,7 +36,7 @@ internal sealed class ConnectionManager
 
 	internal async Task StopAsync()
 	{
-		Console.WriteLine("Disconnecting...");
+		Log.Print("Disconnecting...");
 		_cancellationTokenSource?.Cancel();
 		if (_listeningTask != null)
 			await _listeningTask;
@@ -44,7 +44,7 @@ internal sealed class ConnectionManager
 		_cancellationTokenSource?.Dispose();
 		_cancellationTokenSource = null;
 		_listeningTask = null;
-		Console.WriteLine($"{Log.Green}Disconnected.{Log.Reset}");
+		Log.PrintGreen("Disconnected.");
 	}
 
 	private async Task ConnectionLoopAsync(int port, CancellationToken token)
@@ -64,7 +64,7 @@ internal sealed class ConnectionManager
 			}
 			catch (Exception exception)
 			{
-				Console.WriteLine($"{Log.Yellow}Connection failed: {exception.GetType().Name}: {exception.Message}.{Log.Reset}");
+				Log.PrintYellow($"Connection failed: {exception.GetType().Name}: {exception.Message}.");
 				if (!await RetryAsync(connection))
 					break;
 			}
@@ -81,7 +81,7 @@ internal sealed class ConnectionManager
 		await connection.Client.ConnectAsync(connection.Token);
 		connection.Connected = true;
 		_onConnect?.Invoke();
-		Console.WriteLine($"{Log.Green}Connected.{Log.Reset}");
+		Log.PrintGreen("Connected.");
 	}
 	
 	private async Task ListenAsync(Connection connection)
@@ -89,7 +89,7 @@ internal sealed class ConnectionManager
 		Client client = connection.Client
 			?? throw new InvalidOperationException("Connection client is null.");
 		
-		Console.WriteLine("Listening...");
+		Log.Print("Listening...");
 		while (!connection.Token.IsCancellationRequested)
 		{
 			string message = await client.ReceiveAsync(connection.Token);
@@ -99,7 +99,7 @@ internal sealed class ConnectionManager
 
 	private static async Task<bool> RetryAsync(Connection connection)
 	{
-		Console.WriteLine($"Retrying in {ConnectionRetryDelay / 1000} sec...");
+		Log.Print($"Retrying in {ConnectionRetryDelay / 1000} sec...");
 		try
 		{
 			await Task.Delay(ConnectionRetryDelay, connection.Token);

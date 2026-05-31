@@ -23,14 +23,13 @@ public sealed partial class Driver
 
 	private Driver()
 	{
-		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Driver()]{Log.Reset}");
-		Console.WriteLine("Loading...");
+		Log.Print("Loading...");
 		_connectionManager = new();
 		Config = Config.Load();
 		RlNotFound = RlIsNotFound(Config);
 		Config.Apply(out bool rlNeedRestart);
 		RlNeedRestart = rlNeedRestart;
-		Console.WriteLine($"{Log.Green}Loaded.{Log.Reset}");
+		Log.PrintGreen("Loaded.");
 	}
 
 	public async Task Start()
@@ -76,8 +75,7 @@ public sealed partial class Driver
 
 	private async Task UnsafeUpdateConfigAsync(Config newConfig)
 	{
-		Console.WriteLine($"{Log.Blue}[RlTracker.Core.UpdateConfig()]{Log.Reset}");
-		Console.WriteLine("Updating core config...");
+		Log.Print("Updating core config...");
 
 		RlNotFound = RlIsNotFound(newConfig);
 		if (RlNotFound)
@@ -100,7 +98,7 @@ public sealed partial class Driver
 		}
 		Config = newConfig;
 		Config.Save();
-		Console.WriteLine($"{Log.Green}Core config updated.{Log.Reset}");
+		Log.PrintGreen("Core config updated.");
 		UnsafeStart();
 	}
 
@@ -132,7 +130,7 @@ public sealed partial class Driver
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"{Log.Red}Message parsing error: {exception.Message}.{Log.Reset}");
+			Log.PrintRed($"Message parsing error: {exception.Message}.");
 		}
 	}
 

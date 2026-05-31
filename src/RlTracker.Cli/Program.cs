@@ -29,7 +29,7 @@ internal static class Program
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"{Log.Red}❌ ERROR: {Log.Yellow}{exception.Message}{Log.Reset}");
+			Log.PrintRed($"❌ ERROR: {exception.Message}.");
 			return _exitFailure;
 		}
 		finally

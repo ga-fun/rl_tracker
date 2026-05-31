@@ -38,7 +38,7 @@ internal sealed class Client(int port) : IDisposable
 			if (result.MessageType == WebSocketMessageType.Text)
 				return Encoding.UTF8.GetString(stream.ToArray());
 			else
-				Console.WriteLine($"{Log.Yellow}Binary message ignored.{Log.Reset}");
+				Log.PrintYellow("Binary message ignored.");
 		}
 	}
 

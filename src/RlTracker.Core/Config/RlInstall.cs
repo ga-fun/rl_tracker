@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace RlTracker.Core;
 
 public abstract class RlInstall(string? installDir) : Notifier
@@ -21,6 +23,8 @@ public abstract class RlInstall(string? installDir) : Notifier
 			NotifyChange();
 		}
 	} = installDir;
+
+	[JsonIgnore]
 	public bool IsValid
 	{
 		get;

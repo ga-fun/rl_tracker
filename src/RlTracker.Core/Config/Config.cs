@@ -1,10 +1,11 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace RlTracker.Core;
 
 public sealed partial class Config : Notifier
 {
-	// No constructor, use Config.Load() instead
+	[JsonConstructor]
 	private Config(){}
 	private const double ApiSendPacketRateDefault = 30;
 	private static readonly JsonSerializerOptions JsonOptions = new(){ WriteIndented = true };
@@ -56,7 +57,7 @@ public sealed partial class Config : Notifier
 
 	public static Config Load()
 	{
-		Log.Print($"Loading config from: \"{Log.Yellow}{ConfigFile}{Log.Reset}\".");
+		Log.Print($"Loading config from: {Log.Blue}\"{ConfigFile}\".");
 		if (!File.Exists(ConfigFile))
 		{
 			Log.PrintYellow($"Config file not found.");
@@ -101,14 +102,16 @@ public sealed partial class Config : Notifier
 
 	public void Save()
 	{
+		Log.Dump(this, "Saving config:");
 		string? directory = Path.GetDirectoryName(ConfigFile);
 
 		if (!string.IsNullOrWhiteSpace(directory))
 			Directory.CreateDirectory(directory);
 		string json = JsonSerializer.Serialize(this, JsonOptions);
+		Log.Print("Config serialized:");
 		Console.WriteLine(json);
 		File.WriteAllText(ConfigFile, json);
-		Log.PrintGreen($"Config saved to: \"{ConfigFile}\"");
+		Log.PrintGreen($"Config saved to: {Log.Blue}\"{ConfigFile}\"");
 	}
 
 	private static Config CreateDefault()
