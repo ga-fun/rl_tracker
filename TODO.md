@@ -6,21 +6,21 @@
 > **INT**: Expose internal API
 > **P/I**: public class/getters + private constructor/setters
 
-- Create `Utils`:
+- `Utils`:
 	- **PUB** `Log.cs`
 	- **PUB** `Notifier.cs`
-- Create `Filevdf`:
+- `Filevdf`:
 	- **PUB** `VdfFile.cs` (extract read logic from `RocketLeague.InstallSteam.cs`)
-- Refactor `FileIni`:
+- `FileIni`:
 	- **PUB** `IniFile.cs`
 	- **INT** `Normalizer.cs`
 	- **INT** `Reader.cs`
 	- **INT** `Writer.cs`
-- Create `Connection.cs`
+- `Connection`
 	- **PUB** `Config.cs` (uri, retryDelay, callbacks (utiliser events plutôt ?!))
 	- **PUB** `Manager.cs`
 	- **INT** `Client.cs`
-- Create `RocketLeague`:
+- `RocketLeague`:
 	- **PUB** `Process.cs`
 	- **PUB** `Config.cs` (possède `InstallSteam`, `InstallEpic` et `StatsApiConfig`)
 	- `Install/`:
@@ -31,18 +31,18 @@
 		- **P/I** `StatsConfig.cs`
 		- **PUB** `StatsEvent.cs`
 		- **PUB** `StatsPayload/**/*.cs`
-- Create `RlTracker.Settings`:
+- `RlTracker.Settings`:
 	- **PUB** `UiConfig.cs`
 	- **PUB** `GlobalConfig.cs` => `RocketLeague.Config` + `UiConfig`
 	- **INT** `Serializer.cs`
-- Create `RlTracker.Driver`:
+- `RlTracker.Driver`:
 	- **PUB** `Program.cs` => *ENTRY POINT TEMPORAIRE*
 	- **PUB** `Driver.cs`  => *ORCHESTRATOR*
 	- **INT** `MessageHandler.cs`
 	- **PUB** `State/`:
 		- **PUB** `State.cs`
 		- **PUB** `Models/**/*.cs`
-- Create `RlTracker.Ui`:
+- `RlTracker.Ui`:
 	- **PUB** `Program.cs` => *ENTRY POINT FINAL*
 	- *TODO...*
 

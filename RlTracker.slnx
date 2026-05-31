@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Connection/Connection.csproj" />
+    <Project Path="src/FileIni/FileIni.csproj" />
+    <Project Path="src/FileVdf/FileVdf.csproj" />
+    <Project Path="src/RlTracker.Driver/RlTracker.Driver.csproj" />
+    <Project Path="src/RlTracker.Settings/RlTracker.Settings.csproj" />
+    <Project Path="src/RlTracker.Ui/RlTracker.Ui.csproj" />
+    <Project Path="src/RocketLeague/RocketLeague.csproj" />
+    <Project Path="src/Utils/Utils.csproj" />
+  </Folder>
+</Solution>

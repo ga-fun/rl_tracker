@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/FileIni/FileIni.csproj" />
-    <Project Path="src/RlStatsApi/RlStatsApi.csproj" />
-    <Project Path="src/RlTracker.Cli/RlTracker.Cli.csproj" />
-    <Project Path="src/RlTracker.Core/RlTracker.Core.csproj" />
-  </Folder>
-</Solution>

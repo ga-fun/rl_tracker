@@ -7,8 +7,6 @@ public sealed partial class IniFile
 		string? currentSection = null;
 		int lineNumber = 0;
 
-		if (!File.Exists(FilePath))
-			throw new FileNotFoundException($"File not found: {FilePath}", FilePath);
 		_content.Clear();
 		foreach (string rawLine in File.ReadLines(FilePath))
 		{
