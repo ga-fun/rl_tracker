@@ -2,9 +2,9 @@ using RlStatsApi;
 
 namespace RlTracker.Core;
 
-// TODO: rename
+// `UpdateState` => if `bReplay == true` => ignore it
 
-internal sealed class StatsEventHandler
+internal sealed class MessageHandler
 {
 	private const long SpeedPrintDelaySec = 10;
 	public double MessagePerSec { get; private set; } = 0;

@@ -2,19 +2,20 @@ namespace RlTracker.Core;
 
 internal sealed class ConnectionManager
 {
+	private sealed class Connection(int port, CancellationToken token)
+	{
+		internal int Port { get; } = port;
+		internal CancellationToken Token { get; } = token;
+		internal Client? Client { get; set; }
+		internal bool Connected { get; set; } = false;
+	}
+
 	private const int ConnectionRetryDelay = 1000;
 	private CancellationTokenSource? _cancellationTokenSource = null;
 	private Task? _listeningTask = null;
 	private Action? _onConnect = null;
 	private Action<string>? _onMessage = null;
 	private Action? _onDisconnect = null;
-	private sealed class Connection(int port, CancellationToken token)
-	{
-		public int Port { get; } = port;
-		public CancellationToken Token { get; } = token;
-		public Client? Client { get; set; }
-		public bool Connected { get; set; } = false;
-	}
 
 	internal void StartAsync(
 		int port,

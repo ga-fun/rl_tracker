@@ -5,6 +5,7 @@ using FileIni;
 
 namespace RlStatsApi;
 
+// TODO: inherit from Notifier
 public sealed class Config(int? port, double? packetSendRate)
 {
 	public static readonly string ConfigFileRelativePath = Path.Combine(

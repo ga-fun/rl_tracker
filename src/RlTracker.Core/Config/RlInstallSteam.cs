@@ -1,6 +1,6 @@
 namespace RlTracker.Core;
 
-public sealed partial class Config
+public sealed class RlInstallSteam(string? installDir) : RlInstall(installDir)
 {
 	private const string SteamDirName = "Steam";
 	private const string SteamLibraryDirName = "SteamLibrary";
@@ -11,75 +11,47 @@ public sealed partial class Config
 	private const string SteamLibraryFoldersFileName = "libraryfolders.vdf";
 	private const string SteamVdfPathKey = "path";
 	private const string SteamVdfInstallDirKey = "installdir";
-
 	private static readonly string SteamRlRelativePath = Path.Combine(
 		SteamAppsDirName,
 		SteamCommonDirName,
 		SteamRlDirName);
 
-	public static string? FindSteamRlDir()
+	public override void FindInstallDir()
 	{
-		Console.WriteLine($"{Log.Blue}[RlTracker.Core.Config.FindSteamRlDir()]{Log.Reset}");
 		try
 		{
-			string? res = FindSteamRlDirFromManifests();
-			if (res != null)
-			{
-				Console.WriteLine($"{Log.Green}Steam RL dir (from manifests): {Log.Yellow}{res}.{Log.Reset}");
-				return res;
-			}
-			res = FindSteamRlDirFromClassicPaths();
-			if (res != null)
-			{
-				Console.WriteLine($"{Log.Green}Steam RL dir (from classic paths): {Log.Yellow}{res}.{Log.Reset}");
-				return res;
-			}
-			Console.WriteLine($"{Log.Red}Steam RL dir not found.{Log.Reset}");
-			return null;
+			if (TryFindFromManifests() || TryFindFromClassicPaths())
+				Console.WriteLine($"{Log.Green}RL Steam dir found atuomatically: {Log.Yellow}{InstallDir}.{Log.Reset}");
+			else
+				Console.WriteLine($"{Log.Red}RL Steam dir not found atuomatically.{Log.Reset}");
 		}
 		catch (Exception exception)
 		{
-			Console.WriteLine($"{Log.Red}Exception: {exception.Message}.{Log.Reset}");
-			return null;
+			Console.WriteLine($"{Log.Red}Exception while searching RL Steam dir: {exception.Message}.{Log.Reset}");
 		}
 	}
 
-	private static string? FindSteamRlDirFromManifests()
+	private bool TryFindFromManifests()
 	{
-		foreach (string steamRoot in GetSteamRootCandidates())
+		foreach (string steamRoot in GetRootCandidates())
 		{
-			foreach (string libraryRoot in GetSteamLibraryCandidates(steamRoot))
+			foreach (string libraryRoot in GetLibraryCandidates(steamRoot))
 			{
-				string? installDir = FindSteamRlDirFromManifest(libraryRoot);
-
-				if (installDir != null)
-					return installDir;
+				string manifestFile = Path.Combine(
+					libraryRoot,
+					SteamAppsDirName,
+					SteamManifestFileName);
+				if (TryFindFromManifest(libraryRoot, manifestFile))
+					return true;
 			}
 		}
-		return null;
+		return false;
 	}
 
-	private static string? FindSteamRlDirFromClassicPaths()
+	private bool TryFindFromManifest(string libraryRoot, string manifestFile)
 	{
-		foreach (string steamRoot in GetSteamRootCandidates())
-		{
-			string installDir = Path.Combine(steamRoot, SteamRlRelativePath);
-
-			if (IsRlInstallDir(installDir))
-				return installDir;
-		}
-		return null;
-	}
-
-	private static string? FindSteamRlDirFromManifest(string libraryRoot)
-	{
-		string manifestFile = Path.Combine(
-			libraryRoot,
-			SteamAppsDirName,
-			SteamManifestFileName);
-
 		if (!File.Exists(manifestFile))
-			return null;
+			return false;
 		string installDirName = ReadVdfValueFromFile(
 			manifestFile,
 			SteamVdfInstallDirKey) ?? SteamRlDirName;
@@ -88,17 +60,35 @@ public sealed partial class Config
 			SteamAppsDirName,
 			SteamCommonDirName,
 			installDirName);
-		if (IsRlInstallDir(installDir))
-			return installDir;
-		return null;
+		if (InstallDirIsValid(installDir))
+		{
+			InstallDir = installDir;
+			return true;
+		}
+		return false;
 	}
 
-	private static IEnumerable<string> GetSteamRootCandidates()
+	private bool TryFindFromClassicPaths()
 	{
-		if (!string.IsNullOrWhiteSpace(ProgramFilesX86))
-			yield return Path.Combine(ProgramFilesX86, SteamDirName);
-		if (!string.IsNullOrWhiteSpace(ProgramFiles))
-			yield return Path.Combine(ProgramFiles, SteamDirName);
+		foreach (string steamRoot in GetRootCandidates())
+		{
+			string installDir = Path.Combine(steamRoot, SteamRlRelativePath);
+
+			if (InstallDirIsValid(installDir))
+			{
+				InstallDir = installDir;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static IEnumerable<string> GetRootCandidates()
+	{
+		if (!string.IsNullOrWhiteSpace(ProgramFilesX86Dir))
+			yield return Path.Combine(ProgramFilesX86Dir, SteamDirName);
+		if (!string.IsNullOrWhiteSpace(ProgramFilesDir))
+			yield return Path.Combine(ProgramFilesDir, SteamDirName);
 		foreach (DriveInfo drive in DriveInfo.GetDrives())
 		{
 			if (!drive.IsReady)
@@ -110,7 +100,7 @@ public sealed partial class Config
 		}
 	}
 
-	private static IEnumerable<string> GetSteamLibraryCandidates(string steamRoot)
+	private static IEnumerable<string> GetLibraryCandidates(string steamRoot)
 	{
 		yield return steamRoot;
 

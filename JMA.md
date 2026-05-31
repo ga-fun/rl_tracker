@@ -1,53 +1,47 @@
 # JMA
 
-## Projets
+Hello, encore bravo pour le match ! 🏆
 
-> Séparation `solution` -> `projet` -> `classe` existe aussi en **JAVA** ?
-> Avis sur la séparation des **projets** `FileIni` vs `RlStatsApi` vs `RlTracker.Core` vs `RlTracker.WpfManager` ?
+De mon côté j'ai l'impression de commencer à y voir plus clair sur comment "bien" coder en *OOP*.
+J'ai essayé d'utiliser les *inner class* et l'*héritage* pour mieux organiser mon code.
 
-## Classes et sous-classes
+Je te file donc le repo pour que tu puisses y jeter un oeil quand t'as le temps :
+https://github.com/guillaumeast/rl_tracker
 
-> Quid des classes horizontales vs verticales ?
-- Aujourd'hui : `Driver` - `ConnectionManager` - `Client`
-- Idéeal (?) :
-```
-Driver
- └ Connection Manager
-	└ Client
-```
+C'est encore *WIP* donc tout n'est pas implémenté (il manque nottamment l'`UI`, le `MessageHandler` et la gestion du `State` dans le `Driver`), mais je pense que ça suffit pour que tu puisses voir si je prends une mauvaise direction 🙈.
 
-> Surtout pour les `Models` : d'après le Chat : inner class si "ne fait de sens qu'au sein de la classe" => Donc tous les models sont des inner class de `State` ?!
+Selon moi, en allant du "best" au "worst" module :
+- 😍 `src/RlTracker.Core/Connection/*.cs`
+- 😍 `src/RlTracker.Core/State/**/*.cs`
+- 👌 `src/RlTracker.Core/Driver.cs`
+- 🤔 `src/RlTracker.Core/Utils/**/*.cs` (debug + **tous petits fichiers** sans lien fort avec les autre modules)
+- 🤔 `src/RlStatsApi/**/*.cs` (**plein de fichiers** pour parser les messages de l'API du jeu)
+- 🤮 `src/FileIni/*.cs` (une **énorme classe de 4 fichiers** pour gérer les fichiers `.ini`)
 
-## Classes "énormes"
+`src/RlStatsApi/Config/**/*.cs`
 
-> 🤮 Exemple classe volumineuse : `RlTracker.Core` -> `Config` : split recherche Epic/Steam dans des classes statiques ?
-> 🤮 Exemple beaucoup de classes : `RlStatsApi` -> `Payloads` : sous-classes au lieu de classes ?
-> 🤔 Exemple d'inner class : `RlTracker.Core` -> `ConnectionManager` -> `Connection` : bon usage ?
+Dis-moi si je me trompe mais de ce que j'ai compris il faudrait que :
 
-## Verbosité des `try`/`catch`
+1. Je **SPLIT** `src/FileIni/*.cs` en :
+- `FinelIniReader` (fonction `Read()` + helpers)
+- `FileIniWriter` (fonction `Write()` + helpers)
+- `FileIniNormalizer` (fonctions `Normalize*()`)
+et que je mette ces classes en `internal` pour qu'elles ne soient pas visibles en dehors du *projet* `src/FileIni`
 
-> Exemple : `ConnectionLoopAsync()` (> 50 lignes !)
-> Comment tu fais en Java pour éviter les `try`/`catch` à rallonge ?
+2. Je **MERGE** ce qui touche à *Rocket League* dans un *projet* `src/RocketLeague`:
+- `src/RlTracker.Core/Config/RlInstall*.cs`
+- `src/RlTracker.Core/Utils/RlProcess.cs`
+- `src/RlStatsApi/**/*.cs`
 
-> Mettre les `try`/`catch` dans des **handlers** dédiés ?!
-Par exemple créer `SafeCloseAsync(Client client)` pour remplacer :
-```cs
-try
-{
-	await client.CloseAsync(CancellationToken.None);
-}
-catch
-{}
-```
+PS: J'ai pas pris le temps d'installer `SonarCube` (comme tout bon truc de dev ça ne fonctionne pas "out of the box" faut faire tout un tas de manip que j'ai un peu la flemme de faire pour l'instant 🙈)
 
-## Utilitaires
+😘
 
-> Quid des fonctions / helpers qui n'ont pas de place évidente
-- cf `RlProcess.cs` juste pour `RlIsRunning()` ..?
-- cf `Driver.Config` -> `UnsafeUpdateConfigAsync()` ?
+## Call
 
-## Lisibilité
+1. Enums / Inner class
+2. Attributs statiques
+3. Attributs public
+4. Attributs private
+5. Constructor
 
-> **Commentaires** pour séparer visuellement [attributs / méthodes], [public / private], ... ?
-> Ou plutôt **inner class** (cf `RlTracker.Core` dans `ConnectionManager` -> `Connection`) ?
-> cf `RlTracker.Core` -> `Config` : attributs sont un peu illisibles 🙈

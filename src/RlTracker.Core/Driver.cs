@@ -1,4 +1,6 @@
 using RlStatsApi;
+using RlTracker.Core.Models;
+
 namespace RlTracker.Core;
 
 public sealed partial class Driver
@@ -13,9 +15,10 @@ public sealed partial class Driver
 			field = value && RlProcess.IsRunning();
 		}
 	} = false;
+	public State State { get; set; } = new(State.ConnectionStatus.Disconnected);
 
 	private readonly ConnectionManager _connectionManager;
-	private readonly StatsEventHandler _eventHandler = new();
+	private readonly MessageHandler _messageHandler = new();
 	private readonly SemaphoreSlim _gate = new(1, 1);
 
 	private Driver()
@@ -24,7 +27,7 @@ public sealed partial class Driver
 		Console.WriteLine("Loading...");
 		_connectionManager = new();
 		Config = Config.Load();
-		RlNotFound = Config.EpicRlDir == null && Config.SteamRlDir == null;
+		RlNotFound = RlIsNotFound(Config);
 		Config.Apply(out bool rlNeedRestart);
 		RlNeedRestart = rlNeedRestart;
 		Console.WriteLine($"{Log.Green}Loaded.{Log.Reset}");
@@ -76,7 +79,7 @@ public sealed partial class Driver
 		Console.WriteLine($"{Log.Blue}[RlTracker.Core.UpdateConfig()]{Log.Reset}");
 		Console.WriteLine("Updating core config...");
 
-		RlNotFound = newConfig.EpicRlDir == null && newConfig.SteamRlDir == null;
+		RlNotFound = RlIsNotFound(newConfig);
 		if (RlNotFound)
 		{
 			await _connectionManager.StopAsync();
@@ -86,8 +89,8 @@ public sealed partial class Driver
 		{
 			bool portChanged = newConfig.StatsApiConfig.Port != Config.StatsApiConfig.Port;
 			bool psrChanged = newConfig.StatsApiConfig.PacketSendRate != Config.StatsApiConfig.PacketSendRate;
-			bool epicDirChanged = newConfig.EpicRlDir != Config.EpicRlDir;
-			bool steamDirChanged = newConfig.SteamRlDir != Config.SteamRlDir;
+			bool epicDirChanged = newConfig.EpicInstall.InstallDir != Config.EpicInstall.InstallDir;
+			bool steamDirChanged = newConfig.SteamInstall.InstallDir != Config.SteamInstall.InstallDir;
 
 			if (epicDirChanged || steamDirChanged || portChanged || psrChanged)
 			{
@@ -106,20 +109,26 @@ public sealed partial class Driver
 		if (RlNotFound)
 			return;
 
+		State.ClientStatus = State.ConnectionStatus.Connecting;
 		_connectionManager.StartAsync(
 			Config.StatsApiConfig.Port,
-			null,
+			OnConnect,
 			OnMessage,
 			OnDisconnect
 		);
 	}
 	
+	private void OnConnect()
+	{
+		State.ClientStatus = State.ConnectionStatus.Connected;
+	}
+
 	private void OnMessage(string message)
 	{
 		try
 		{
 			Event apiEvent = new(message);
-			_eventHandler.HandleEvent(apiEvent);
+			_messageHandler.HandleEvent(apiEvent);
 		}
 		catch (Exception exception)
 		{
@@ -131,5 +140,11 @@ public sealed partial class Driver
 	{
 		if (RlNeedRestart && !RlProcess.IsRunning())
 			RlNeedRestart = false;
+		State.ClientStatus = State.ConnectionStatus.Disconnected;
+	}
+
+	private static bool RlIsNotFound(Config config)
+	{
+		return !config.EpicInstall.IsValid && !config.SteamInstall.IsValid;
 	}
 }
