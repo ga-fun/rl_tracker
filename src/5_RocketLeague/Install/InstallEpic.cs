@@ -42,6 +42,7 @@ public sealed class InstallEpic : Install
 	public InstallEpic(string? installDir)
 	{
 		InstallDir = installDir;
+		IsValid = InstallDirIsValid(installDir);
 	}
 
 	public InstallEpic()

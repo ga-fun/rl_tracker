@@ -77,7 +77,14 @@ public sealed partial class Config : Notifier
 			if (configMaybe != null)
 			{
 				configMaybe.SubscribeInstallChanges();
-				
+				if (!configMaybe.EpicInstall.IsValid)
+				{
+					configMaybe.EpicInstall.AutoDetectInstallDir();
+				}
+				if (!configMaybe.SteamInstall.IsValid)
+				{
+					configMaybe.SteamInstall.AutoDetectInstallDir();
+				}
 				Log.Dump(configMaybe, $"{Log.Green}Config loaded:");
 				return configMaybe;
 			}

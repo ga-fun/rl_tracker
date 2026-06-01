@@ -24,6 +24,7 @@ public sealed class InstallSteam : Install
 	public InstallSteam(string? installDir)
 	{
 		InstallDir = installDir;
+		IsValid = InstallDirIsValid(installDir);
 	}
 
 	public InstallSteam()
