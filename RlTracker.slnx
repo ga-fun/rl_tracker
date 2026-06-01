@@ -9,8 +9,8 @@
   <Folder Name="/src/3_FileIni/">
     <Project Path="src/3_FileIni/FileIni.csproj" />
   </Folder>
-  <Folder Name="/src/4_Connection/">
-    <Project Path="src/4_Connection/Connection.csproj" />
+  <Folder Name="/src/4_Network/">
+    <Project Path="src/4_Network/Network.csproj" />
   </Folder>
   <Folder Name="/src/5_RocketLeague/">
     <Project Path="src/5_RocketLeague/RocketLeague.csproj" />

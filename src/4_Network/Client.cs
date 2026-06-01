@@ -1,8 +1,9 @@
 using System.Text;
 using System.Net;
 using System.Net.WebSockets;
+using GuillaumeAst.Utils;
 
-namespace RlTracker.Core;
+namespace GuillaumeAst.Network;
 
 internal sealed class Client(int port) : IDisposable
 {
@@ -29,16 +30,24 @@ internal sealed class Client(int port) : IDisposable
 			{
 				result = await _socket.ReceiveAsync(buffer, token);
 				if (result.MessageType == WebSocketMessageType.Close)
-					throw new WebSocketException("WebSocket was closed.");
+				{
+					throw new WebSocketException("WebSocket has been closed.");
+				}
 				if (result.MessageType == WebSocketMessageType.Text)
+				{
 					stream.Write(buffer, 0, result.Count);
+				}
 			}
 			while (!result.EndOfMessage);
 
 			if (result.MessageType == WebSocketMessageType.Text)
+			{
 				return Encoding.UTF8.GetString(stream.ToArray());
+			}
 			else
+			{
 				Log.PrintYellow("Binary message ignored.");
+			}
 		}
 	}
 
@@ -58,7 +67,9 @@ internal sealed class Client(int port) : IDisposable
 	private void CheckConnection()
 	{
 		if (_socket.State != WebSocketState.Open)
+		{
 			throw new WebSocketException("WebSocket is not open.");
+		}
 	}
 
 	public void Dispose()

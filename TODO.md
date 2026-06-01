@@ -1,8 +1,5 @@
 # REFACTOR
 
-- ⚠️ `Connection/Client` => Exceptions custom pour différencier si ça vaut le coup de retry ou non
-- ⚠️ `Connection/Manager` => ne pas catch toutes les exceptions !! (OOM par exemple doit remonter !!)
-
 - Namespaces `GuillaumeAst.`:
 ```cs
 // Au lieu de
