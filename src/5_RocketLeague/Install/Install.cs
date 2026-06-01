@@ -1,0 +1,87 @@
+using System.Text.Json.Serialization;
+using GuillaumeAst.Utils;
+
+namespace GuillaumeAst.RocketLeague;
+
+public abstract class Install : Notifier
+{
+	protected static readonly string ProgramFilesDir = Environment.GetFolderPath(
+		Environment.SpecialFolder.ProgramFiles);
+	protected static readonly string ProgramFilesX86Dir = Environment.GetFolderPath(
+		Environment.SpecialFolder.ProgramFilesX86);
+	protected const string GamesDirName = "Games";
+
+	public string? InstallDir
+	{
+		get;
+		set
+		{
+			if (field == value)
+			{
+				return;
+			}
+			field = value;
+			if (value == null)
+			{
+				AutoDetectInstallDir();
+			}
+			IsValid = InstallDirIsValid(InstallDir);
+			NotifyChange();
+		}
+	}
+
+	[JsonIgnore]
+	public bool IsValid
+	{
+		get;
+		private set
+		{
+			if (field == value)
+			{
+				return;
+			}
+			field = value;
+			NotifyChange();
+		}
+	}
+
+	protected Install(string? installDir)
+	{
+		if (installDir != null)
+		{
+			InstallDir = installDir;
+		}
+		else
+		{
+			IsValid = false;
+		}
+	}
+
+	public abstract void AutoDetectInstallDir();
+
+	public static bool InstallDirIsValid(string? installDir)
+	{
+		return !string.IsNullOrWhiteSpace(installDir)
+			&& Directory.Exists(installDir)
+			&& File.Exists(Path.Combine(
+				installDir,
+				StatsApi.Config.ConfigFileRelativePath
+			));
+	}
+
+	protected static DriveInfo[] GetDrivesOrEmpty()
+	{
+		try
+		{
+			return DriveInfo.GetDrives();
+		}
+		catch (IOException)
+		{
+			return [];
+		}
+		catch (UnauthorizedAccessException)
+		{
+			return [];
+		}
+	}
+}

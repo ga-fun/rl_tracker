@@ -11,15 +11,18 @@ public static class VdfFile
 		return null;
 	}
 
-	public static IEnumerable<string> ReadValues(string filePath, string key)
+	public static string[] ReadValues(string filePath, string key)
 	{
+		List<string> values = [];
+
 		foreach (string line in File.ReadLines(filePath))
 		{
 			if (TryReadValue(line, key, out string value))
 			{
-				yield return value;
+				values.Add(value);
 			}
 		}
+		return [.. values];
 	}
 
 	private static bool TryReadValue(string line, string key, out string value)

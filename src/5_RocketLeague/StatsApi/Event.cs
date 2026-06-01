@@ -1,61 +1,86 @@
 using System.Text.Json;
 
-namespace RlStatsApi;
+namespace GuillaumeAst.RocketLeague.StatsApi;
 
 public sealed class Event
 {
-	public Type Type { get; }
-	public Payload Payload { get; }
-
-	private static readonly Dictionary<Type, Func<JsonDocument, Payload>>
+	private static readonly Dictionary<EventType, Func<JsonDocument, Payload>>
 		PayloadParsers = new()
 		{
-			{ Type.UpdateState, ParsePayload<PayloadUpdateState> },
-			{ Type.BallHit, ParsePayload<PayloadBallHit> },
-			{ Type.ClockUpdatedSeconds, ParsePayload<PayloadClockUpdatedSeconds> },
-			{ Type.CountdownBegin, ParsePayload<PayloadCountdownBegin> },
-			{ Type.CrossbarHit, ParsePayload<PayloadCrossbarHit> },
-			{ Type.GoalReplayEnd, ParsePayload<PayloadGoalReplayEnd> },
-			{ Type.GoalReplayStart, ParsePayload<PayloadGoalReplayStart> },
-			{ Type.GoalReplayWillEnd, ParsePayload<PayloadGoalReplayWillEnd> },
-			{ Type.GoalScored, ParsePayload<PayloadGoalScored> },
-			{ Type.MatchCreated, ParsePayload<PayloadMatchCreated> },
-			{ Type.MatchInitialized, ParsePayload<PayloadMatchInitialized> },
-			{ Type.MatchDestroyed, ParsePayload<PayloadMatchDestroyed> },
-			{ Type.MatchEnded, ParsePayload<PayloadMatchEnded> },
-			{ Type.MatchPaused, ParsePayload<PayloadMatchPaused> },
-			{ Type.MatchUnpaused, ParsePayload<PayloadMatchUnpaused> },
-			{ Type.PodiumStart, ParsePayload<PayloadPodiumStart> },
-			{ Type.ReplayCreated, ParsePayload<PayloadReplayCreated> },
-			{ Type.RoundStarted, ParsePayload<PayloadRoundStarted> },
-			{ Type.StatfeedEvent, ParsePayload<PayloadStatfeedEvent> }
+			{ EventType.UpdateState, ParsePayload<PayloadUpdateState> },
+			{ EventType.BallHit, ParsePayload<PayloadBallHit> },
+			{ EventType.ClockUpdatedSeconds, ParsePayload<PayloadClockUpdatedSeconds> },
+			{ EventType.CountdownBegin, ParsePayload<PayloadCountdownBegin> },
+			{ EventType.CrossbarHit, ParsePayload<PayloadCrossbarHit> },
+			{ EventType.GoalReplayEnd, ParsePayload<PayloadGoalReplayEnd> },
+			{ EventType.GoalReplayStart, ParsePayload<PayloadGoalReplayStart> },
+			{ EventType.GoalReplayWillEnd, ParsePayload<PayloadGoalReplayWillEnd> },
+			{ EventType.GoalScored, ParsePayload<PayloadGoalScored> },
+			{ EventType.MatchCreated, ParsePayload<PayloadMatchCreated> },
+			{ EventType.MatchInitialized, ParsePayload<PayloadMatchInitialized> },
+			{ EventType.MatchDestroyed, ParsePayload<PayloadMatchDestroyed> },
+			{ EventType.MatchEnded, ParsePayload<PayloadMatchEnded> },
+			{ EventType.MatchPaused, ParsePayload<PayloadMatchPaused> },
+			{ EventType.MatchUnpaused, ParsePayload<PayloadMatchUnpaused> },
+			{ EventType.PodiumStart, ParsePayload<PayloadPodiumStart> },
+			{ EventType.ReplayCreated, ParsePayload<PayloadReplayCreated> },
+			{ EventType.RoundStarted, ParsePayload<PayloadRoundStarted> },
+			{ EventType.StatfeedEvent, ParsePayload<PayloadStatfeedEvent> }
 		};
+
+	public EventType Type { get; }
+	public Payload Payload { get; }
 
 	public Event(string rawMessage)
 	{
-		ArgumentNullException.ThrowIfNull(rawMessage);
-
-		using JsonDocument document = JsonDocument.Parse(rawMessage);
-
-		Type = ParseType(document);
-		if (!PayloadParsers.TryGetValue(Type, out Func<JsonDocument, Payload>? parser))
-			throw new InvalidOperationException($"Unsupported event: {Type}.");
-		Payload = parser(document);
+		ArgumentException.ThrowIfNullOrWhiteSpace(rawMessage);
+		JsonDocument document;
+		try
+		{
+			document = JsonDocument.Parse(rawMessage);
+		}
+		catch (JsonException exception)
+		{
+			throw new FormatException("Invalid message: must be JSON encoded.", exception);
+		}
+		using (document)
+		{
+			if (document.RootElement.ValueKind != JsonValueKind.Object)
+			{
+				throw new FormatException("Invalid message: Root JSON value must be an object.");
+			}
+			Type = ParseType(document);
+			if (!PayloadParsers.TryGetValue(Type, out Func<JsonDocument, Payload>? parser))
+			{
+				throw new NotSupportedException($"Unsupported event: \"{Type}\".");
+			}
+			Payload = parser(document);
+		}
 	}
 
-	private static Type ParseType(JsonDocument document)
+	private static EventType ParseType(JsonDocument document)
 	{
 		const string field = "Event";
 		string value;
 
 		if (!document.RootElement.TryGetProperty(field, out JsonElement property))
+		{
 			throw new FormatException($"Missing field: \"{field}\".");
+		}
+		if (property.ValueKind != JsonValueKind.String)
+		{
+			throw new FormatException($"Invalid field: \"{field}\" is not a string.");
+		}
 		value = property.GetString()
 			?? throw new FormatException($"Invalid field: \"{field}\".");
-		if (!Enum.TryParse(value, out Type type))
-			throw new FormatException($"Invalid \"{field}\": {value}.");
+		if (!Enum.TryParse(value, out EventType type))
+		{
+			throw new FormatException($"Invalid \"{field}\": \"{value}\".");
+		}
 		if (Enum.GetName(type) != value)
-			throw new FormatException($"Invalid \"{field}\": {value}.");
+		{
+			throw new FormatException($"Invalid \"{field}\": \"{value}\".");
+		}
 		return type;
 	}
 
@@ -63,13 +88,25 @@ public sealed class Event
 		where T : Payload
 	{
 		const string field = "Data";
+		T payload;
 
 		if (!document.RootElement.TryGetProperty(field, out JsonElement property))
+		{
 			throw new FormatException($"Missing field: \"{field}\".");
+		}
 		if (property.ValueKind != JsonValueKind.Object)
+		{
 			throw new FormatException($"Invalid field: \"{field}\" is not an object.");
-		T payload = JsonSerializer.Deserialize<T>(property)
-			?? throw new FormatException($"Failed to parse payload: {typeof(T).Name}.");
+		}
+		try
+		{
+			payload = JsonSerializer.Deserialize<T>(property)
+				?? throw new FormatException($"Invalid payload: {typeof(T).Name}.");
+		}
+		catch (JsonException exception)
+		{
+			throw new FormatException($"Invalid payload: {typeof(T).Name}.", exception);
+		}
 		return payload;
 	}
 }

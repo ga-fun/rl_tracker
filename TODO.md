@@ -74,9 +74,9 @@ catch (Exception exception)
 		- **P/I** `InstallSteam.cs`
 		- **P/I** `InstallEpic.cs`
 	- `StatsApi/`:
-		- **P/I** `StatsConfig.cs`
-		- **PUB** `StatsEvent.cs`
-		- **PUB** `StatsPayload/**/*.cs`
+		- **P/I** `Config.cs`
+		- **PUB** `Event.cs`
+		- **PUB** `Payload/**/*.cs`
 - `RlTracker.Settings`:
 	- **PUB** `UiConfig.cs`
 	- **PUB** `GlobalConfig.cs` => `RocketLeague.Config` + `UiConfig`

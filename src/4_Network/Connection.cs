@@ -3,9 +3,9 @@ using GuillaumeAst.Utils;
 
 namespace GuillaumeAst.Network;
 
-public sealed class Connection
+public sealed class Connection : Notifier
 {
-	public enum ConnectionOnExceptionAction
+	public enum ExceptionAction
 	{
 		Continue,
 		Stop
@@ -13,7 +13,7 @@ public sealed class Connection
 
 	public enum ConnectionStatus
 	{
-		Connecting,		// Initial connexion try
+		Connecting,		// Initial connection try
 		Connected,		// Connected
 		Reconnecting,	// Trying to reconnect after initial connection success
 		Disconnecting,	// Voluntary disconnecting
@@ -30,20 +30,30 @@ public sealed class Connection
 
 	private const int ConnectionRetryDelay = 1000;
 
-	public event Action? Connected = null;
 	public event Action<Exception>? Reconnecting = null;
 	public event Action<string>? MessageReceived = null;
-	public event Action? Disconnected = null;
-	public ConnectionStatus Status { get; private set; } = ConnectionStatus.Disconnected;
+	public ConnectionStatus Status
+	{
+		get;
+		private set
+		{
+			if (field == value)
+			{
+				return;
+			}
+			field = value;
+			NotifyChange();
+		}
+	} = ConnectionStatus.Disconnected;
 
 	private readonly SemaphoreSlim _publicGate = new(1, 1);
 	private readonly SemaphoreSlim _cleanupGate = new(1, 1);
 	private CancellationTokenSource? _tokenSource = null;
 	private Task? _listeningTask = null;
 	private Task? _cleanupTask = null;
-	private Func<Exception, ConnectionOnExceptionAction>? _onException = null;
+	private Func<Exception, ExceptionAction>? _onException = null;
 
-	public async Task StartAsync(int port, Func<Exception, ConnectionOnExceptionAction> onException)
+	public async Task StartAsync(int port, Func<Exception, ExceptionAction> onException)
 	{
 		ArgumentNullException.ThrowIfNull(onException);
 
@@ -91,7 +101,7 @@ public sealed class Connection
 			}
 			catch (Exception exception)
 			{
-				if (_onException!(exception) != ConnectionOnExceptionAction.Continue)
+				if (_onException!(exception) != ExceptionAction.Continue)
 				{
 					await StopInternalAsync(true);
 					return;
@@ -134,7 +144,6 @@ public sealed class Connection
 		state.Client = new(state.Port);
 		await state.Client.ConnectAsync(state.Token);
 		Status = ConnectionStatus.Connected;
-		TryEvent(Connected);
 		Log.PrintGreen("Connected.");
 	}
 	
@@ -199,21 +208,6 @@ public sealed class Connection
 		{}
 	}
 
-	private void TryEvent(Action? callback)
-	{
-		try
-		{
-			callback?.Invoke();
-		}
-		catch (Exception exception)
-		{
-			if (_onException!(exception) == ConnectionOnExceptionAction.Stop)
-			{
-				throw;
-			}
-		}
-	}
-
 	private void TryEvent<T>(Action<T>? callback, T arg)
 	{
 		try
@@ -222,7 +216,7 @@ public sealed class Connection
 		}
 		catch (Exception exception)
 		{
-			if (_onException!(exception) == ConnectionOnExceptionAction.Stop)
+			if (_onException!(exception) == ExceptionAction.Stop)
 			{
 				throw;
 			}
@@ -288,7 +282,6 @@ public sealed class Connection
 				_cleanupTask = null;
 				Status = ConnectionStatus.Disconnected;
 				Log.PrintGreen("Disconnected.");
-				TryEvent(Disconnected);
 			}
 		}
 	}
