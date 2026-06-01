@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace GuillaumeAst.RocketLeague.StatsApi;
 
 public sealed class Game(
-	IReadOnlyList<Team>? teams,
+	IReadOnlyList<Team> teams,
 	int? timeSeconds,
 	bool? bOvertime,
 	int? frame,
@@ -17,7 +17,7 @@ public sealed class Game(
 	PlayerRef? target
 )
 {
-	public IReadOnlyList<Team>? Teams { get; } = teams;
+	public IReadOnlyList<Team> Teams { get; } = teams;
 	public int? TimeSeconds { get; } = timeSeconds;
 
 	[JsonPropertyName("bOvertime")]

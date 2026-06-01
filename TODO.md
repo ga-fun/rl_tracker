@@ -1,7 +1,9 @@
 # TODO
 
+- ⚠️ **Nouveau double Autodetect des install dir !!** ⚠️
 - `RlNotFound` + `RlNeedRestart` => move to `RocketLeague.Config`
-- `Catch` vides => Mettre un commentaire pour expliciter pourquoi on fait rien
+- Remove useless `?` from payloads!
+- `Log.Write(string message)` => write dans un file log
 - `Network.Client` => Handle `TCP Frames` ?
 
 ---

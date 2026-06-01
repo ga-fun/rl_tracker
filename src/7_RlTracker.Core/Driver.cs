@@ -4,25 +4,12 @@ using GuillaumeAst.Network;
 using GuillaumeAst.RocketLeague;
 using StatsApiEvent = GuillaumeAst.RocketLeague.StatsApi.Event;
 using GuillaumeAst.RlTracker.Settings;
-using GuillaumeAst.RlTracker.Core.Models;
 
 namespace GuillaumeAst.RlTracker.Core;
 
 public sealed partial class Driver : Notifier
 {
-	public static Driver Instance { get; } = new();
-	public Config Config
-	{
-		get;
-		private set
-		{
-			if (field != value)
-			{
-				field = value;
-				NotifyChange();
-			}
-		}
-	}
+	/* ---------- TODO (START): move to RocketLeague Project ---------- */
 	public bool RlNotFound
 	{
 		get;
@@ -48,15 +35,34 @@ public sealed partial class Driver : Notifier
 		}
 	} = false;
 
-	public State State { get; } = new();
-	public Connection Connection { get; }
-	private readonly MessageHandler _messageHandler = new();
-	private readonly SemaphoreSlim _gate = new(1, 1);
+	private static bool RlIsNotFound(Config config)
+	{
+		return !config.EpicInstall.IsValid && !config.SteamInstall.IsValid;
+	}
+	/* ---------- TODO (END): move to RocketLeague Project ---------- */
+
+	public static readonly State State = new();
+	public static readonly Connection Connection = new();
+	public Config Config
+	{
+		get;
+		private set
+		{
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
+		}
+	}
+	public static Driver Instance { get; } = new();
+	
+	private static readonly MessageHandler MessageHandler = new(State);
+	private static readonly SemaphoreSlim _gate = new(1, 1);
 
 	private Driver()
 	{
 		Log.Print("Loading...");
-		Connection = new();
 		Connection.MessageReceived += OnMessage;
 		Connection.PropertyChanged += OnConnectionChanged;
 		Config = Config.Load();
@@ -79,7 +85,7 @@ public sealed partial class Driver : Notifier
 		}
 	}
 
-	public async Task Stop()
+	public static async Task Stop()
 	{
 		await _gate.WaitAsync();
 		try
@@ -156,7 +162,7 @@ public sealed partial class Driver : Notifier
 		try
 		{
 			StatsApiEvent apiEvent = new(message);
-			_messageHandler.HandleEvent(apiEvent);
+			MessageHandler.HandleEvent(apiEvent);
 		}
 		catch (Exception exception) when (exception
 			is FormatException
@@ -185,10 +191,5 @@ public sealed partial class Driver : Notifier
 		{
 			RlNeedRestart = false;
 		}
-	}
-
-	private static bool RlIsNotFound(Config config)
-	{
-		return !config.EpicInstall.IsValid && !config.SteamInstall.IsValid;
 	}
 }

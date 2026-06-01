@@ -1,10 +1,10 @@
-namespace GuillaumeAst.RlTracker.Core.Models;
+namespace GuillaumeAst.RlTracker.Core;
 
 public enum GameMode
 {
+	Other,
 	OneVersusOne,
 	TwoVersusTwo,
 	ThreeVersusThree,
-	Other,
 	Count
 }

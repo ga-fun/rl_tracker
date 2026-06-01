@@ -1,4 +1,4 @@
-namespace GuillaumeAst.RlTracker.Core.Models;
+namespace GuillaumeAst.RlTracker.Core;
 
 public sealed class Player
 {
@@ -10,12 +10,6 @@ public sealed class Player
 		Xbox,
 		Switch,
 		Unknown
-	}
-
-	public enum Team
-	{
-		Blue,
-		Orange
 	}
 
 	public string Name { get; }

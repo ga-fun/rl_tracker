@@ -1,6 +1,6 @@
 using GuillaumeAst.Utils;
 
-namespace GuillaumeAst.RlTracker.Core.Models;
+namespace GuillaumeAst.RlTracker.Core;
 
 public sealed class Tracker : Notifier
 {

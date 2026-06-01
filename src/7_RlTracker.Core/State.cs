@@ -1,17 +1,24 @@
 using GuillaumeAst.Utils;
 
-namespace GuillaumeAst.RlTracker.Core.Models;
+namespace GuillaumeAst.RlTracker.Core;
 
 public sealed class State : Notifier
 {
+	public Match? CurrentMatch
+	{
+		get;
+		set;
+	}
 	public GameMode CurrentGameMode
 	{
 		get;
 		private set
 		{
+			ValidateGameMode(value);
 			if (field != value)
 			{
 				field = value;
+				CurrentTracker = Trackers[(int)value];
 				NotifyChange();
 			}
 		}
@@ -58,30 +65,26 @@ public sealed class State : Notifier
 
 	public void PlusWin(GameMode gameMode)
 	{
-		ValidateGameMode(gameMode);
+		CurrentGameMode = gameMode;
 		Trackers[(int)gameMode].PlusWin();
-		UpdateCurrentTracker(gameMode);
 	}
 
 	public void MinusWin(GameMode gameMode)
 	{
-		ValidateGameMode(gameMode);
+		CurrentGameMode = gameMode;
 		Trackers[(int)gameMode].MinusWin();
-		UpdateCurrentTracker(gameMode);
 	}
 
 	public void PlusLoss(GameMode gameMode)
 	{
-		ValidateGameMode(gameMode);
+		CurrentGameMode = gameMode;
 		Trackers[(int)gameMode].PlusLoss();
-		UpdateCurrentTracker(gameMode);
 	}
 
 	public void MinusLoss(GameMode gameMode)
 	{
-		ValidateGameMode(gameMode);
+		CurrentGameMode = gameMode;
 		Trackers[(int)gameMode].MinusLoss();
-		UpdateCurrentTracker(gameMode);
 	}
 
 	public void ResetTracker(GameMode gameMode)
@@ -95,15 +98,6 @@ public sealed class State : Notifier
 		foreach (Tracker tracker in Trackers)
 		{
 			tracker.Reset();
-		}
-	}
-
-	private void UpdateCurrentTracker(GameMode gameMode)
-	{
-		if (gameMode != CurrentGameMode)
-		{
-			CurrentGameMode = gameMode;
-			CurrentTracker = Trackers[(int)gameMode];
 		}
 	}
 

@@ -36,7 +36,7 @@ internal static class Program
 		}
 		finally
 		{
-			await driver.Stop();
+			await Driver.Stop();
 			source.Dispose();
 		}
 		return _exitSuccess;
