@@ -42,10 +42,6 @@ public sealed class InstallEpic : Install
 	public InstallEpic(string? installDir)
 	{
 		InstallDir = installDir;
-		if (installDir == null || !IsValid)
-		{
-			AutoDetectInstallDir();
-		}
 	}
 
 	public InstallEpic()

@@ -77,6 +77,7 @@ public sealed partial class Config : Notifier
 			if (configMaybe != null)
 			{
 				configMaybe.SubscribeInstallChanges();
+				
 				Log.Dump(configMaybe, $"{Log.Green}Config loaded:");
 				return configMaybe;
 			}

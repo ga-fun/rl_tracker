@@ -24,10 +24,6 @@ public sealed class InstallSteam : Install
 	public InstallSteam(string? installDir)
 	{
 		InstallDir = installDir;
-		if (installDir == null || !IsValid)
-		{
-			AutoDetectInstallDir();
-		}
 	}
 
 	public InstallSteam()
