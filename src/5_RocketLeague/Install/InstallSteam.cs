@@ -21,7 +21,7 @@ public sealed class InstallSteam : Install
 		SteamRlDirName);
 
 	[JsonConstructor]
-	public InstallSteam(string? installDir)
+	private InstallSteam(string? installDir)
 	{
 		InstallDir = installDir;
 		IsValid = InstallDirIsValid(installDir);

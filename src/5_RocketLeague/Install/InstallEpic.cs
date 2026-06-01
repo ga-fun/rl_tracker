@@ -39,7 +39,7 @@ public sealed class InstallEpic : Install
 	}
 
 	[JsonConstructor]
-	public InstallEpic(string? installDir)
+	private InstallEpic(string? installDir)
 	{
 		InstallDir = installDir;
 		IsValid = InstallDirIsValid(installDir);
