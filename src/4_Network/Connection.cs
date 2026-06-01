@@ -38,12 +38,11 @@ public sealed class Connection : Notifier
 		get;
 		private set
 		{
-			if (field == value)
+			if (field != value)
 			{
-				return;
+				field = value;
+				NotifyChange();
 			}
-			field = value;
-			NotifyChange();
 		}
 	} = ConnectionStatus.Disconnected;
 
@@ -191,9 +190,13 @@ public sealed class Connection : Notifier
 			catch (Exception exception) when (exception
 				is IOException
 				or SocketException)
-			{}
+			{
+				// Already disconnected
+			}
 			catch (ObjectDisposedException)
-			{}
+			{
+				//  Already disposed
+			}
 			finally
 			{
 				client.Dispose();
@@ -210,7 +213,9 @@ public sealed class Connection : Notifier
 			await Task.Delay(ConnectionRetryDelay, state.Token);
 		}
 		catch (OperationCanceledException)
-		{}
+		{
+			// Operation has been cancelled by caller
+		}
 	}
 
 	private void TryEvent<T>(Action<T>? callback, T arg)
@@ -269,7 +274,9 @@ public sealed class Connection : Notifier
 			_tokenSource?.Cancel();
 		}
 		catch (ObjectDisposedException)
-		{}
+		{
+			// Token source is already disposed
+		}
 		finally
 		{
 			if (!calledFromListeningTask && _listeningTask != null)

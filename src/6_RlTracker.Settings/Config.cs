@@ -25,7 +25,9 @@ public sealed partial class Config : Notifier
 			configRootDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 		}
 		catch (PlatformNotSupportedException)
-		{}
+		{
+			// Fallback available
+		}
 		if (string.IsNullOrWhiteSpace(configRootDir))
 		{
 			try
@@ -33,7 +35,9 @@ public sealed partial class Config : Notifier
 				configRootDir = Environment.GetEnvironmentVariable("HOME");
 			}
 			catch (System.Security.SecurityException)
-			{}
+			{
+				// Fallback available
+			}
 		}
 		if (string.IsNullOrWhiteSpace(configRootDir))
 		{
@@ -42,7 +46,9 @@ public sealed partial class Config : Notifier
 				configRootDir = Environment.GetEnvironmentVariable("USERPROFILE");
 			}
 			catch (System.Security.SecurityException)
-			{}
+			{
+				// Fallback available
+			}
 		}
 		if (string.IsNullOrWhiteSpace(configRootDir))
 		{

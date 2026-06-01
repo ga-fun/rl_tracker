@@ -27,6 +27,7 @@ internal static class Program
 		}
 		catch (OperationCanceledException)
 		{
+			// Operation has been canceled by the Program itself (quit button...)
 		}
 		catch (Exception exception)
 		{
@@ -36,6 +37,7 @@ internal static class Program
 		finally
 		{
 			await driver.Stop();
+			source.Dispose();
 		}
 		return _exitSuccess;
 	}

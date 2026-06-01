@@ -19,7 +19,6 @@ public sealed class Config : Notifier
 	public const double PacketSendRateDisabled = 0;
 	public const double PacketSendRateMin = 0;
 	public const double PacketSendRateMax = 120;
-
 	private const string Section = "TAGame.MatchStatsExporter_TA";
 	private const string PortKey = "Port";
 	private const string PacketSendRateKey = "PacketSendRate";
@@ -56,7 +55,7 @@ public sealed class Config : Notifier
 		set
 		{
 			double normalized = NormalizePacketSendRate(value);
-			if (field == normalized)
+			if (Maths.DoublesAreEqual(normalized, field))
 			{
 				return;
 			}
@@ -158,6 +157,6 @@ public sealed class Config : Notifier
 		{
 			return false;
 		}
-		return currentPort == Port && currentPSR == PacketSendRate;
+		return currentPort == Port && Maths.DoublesAreEqual(currentPSR, PacketSendRate);
 	}
 }

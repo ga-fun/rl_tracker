@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
+namespace GuillaumeAst.Network;
+
 internal sealed class Client(int port) : IDisposable
 {
 	private const int BufferSize = 8192;

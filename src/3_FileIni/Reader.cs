@@ -16,27 +16,20 @@ internal static class Reader
 		foreach (string rawLine in File.ReadLines(state.DestinationFile.FilePath))
 		{
 			state.LineNumber++;
-			ReadLine(state, rawLine);
+			string line = rawLine.Trim();
+			if (line.Length > 0 && !line.StartsWith(';') && !line.StartsWith('#'))
+			{
+				if (line.StartsWith('['))
+				{
+					ReadSection(state, line);
+				}
+				else
+				{
+					ReadKeyValue(state, line);
+				}
+			}
 		}
 		return state.DestinationFile;
-	}
-
-	private static void ReadLine(State state, string rawLine)
-	{
-		string line = rawLine.Trim();
-
-		if (line.Length == 0 || line.StartsWith(';') || line.StartsWith('#'))
-		{
-			return;
-		}
-		else if (line.StartsWith('['))
-		{
-			ReadSection(state, line);
-		}
-		else
-		{
-			ReadKeyValue(state, line);
-		}
 	}
 
 	private static void ReadSection(State state, string line)

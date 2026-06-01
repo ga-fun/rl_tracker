@@ -10,7 +10,6 @@ internal sealed class MessageHandler
 	private const long SpeedPrintDelaySec = 10;
 	public double MessagePerSec { get; private set; } = 0;
 	private long? _timeStartSec = null;
-	private long? _timeCurrSec = null;
 	private long _messageCount = 0;
 	private long _timeLastSpeedPrint = 0;
 
@@ -38,17 +37,14 @@ internal sealed class MessageHandler
 
 	private void UpdateSpeed()
 	{
-		if (_timeStartSec == null)
-		{
-			_timeStartSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-		}
-		_timeCurrSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		_timeStartSec ??= DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		long _timeCurrSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 		_messageCount++;
 		MessagePerSec = _messageCount / (double)(_timeCurrSec - _timeStartSec);
 		if (_timeCurrSec - _timeLastSpeedPrint >= 10)
 		{
 			Log.PrintBlue($"===> [{MessagePerSec}/sec] <===");
-			_timeLastSpeedPrint = _timeCurrSec.Value;
+			_timeLastSpeedPrint = _timeCurrSec;
 		}
 	}
 }

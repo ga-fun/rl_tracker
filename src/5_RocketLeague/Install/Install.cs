@@ -32,10 +32,13 @@ public abstract class Install : Notifier
 			{
 				return;
 			}
-			field = value;
-			if (value == null)
+			if (value == null || !InstallDirIsValid(value))
 			{
 				AutoDetectInstallDir();
+			}
+			else
+			{
+				field = value;
 			}
 			IsValid = InstallDirIsValid(InstallDir);
 			NotifyChange();
@@ -48,12 +51,11 @@ public abstract class Install : Notifier
 		get;
 		protected set
 		{
-			if (field == value)
+			if (field != value)
 			{
-				return;
+				field = value;
+				NotifyChange();
 			}
-			field = value;
-			NotifyChange();
 		}
 	}
 

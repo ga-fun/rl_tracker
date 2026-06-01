@@ -4,7 +4,7 @@ public sealed class PayloadBallHit(
 	string? matchGuid,
 	IReadOnlyList<PlayerRef>? players,
 	BallHitBall? ball
-) : Payload
+) : IPayload
 {
 	public string? MatchGuid { get; } = matchGuid;
 	public IReadOnlyList<PlayerRef>? Players { get; } = players;

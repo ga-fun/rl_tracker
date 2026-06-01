@@ -6,7 +6,7 @@ public sealed class PayloadStatfeedEvent(
 	PlayerRef? mainTarget,
 	string? matchGuid,
 	PlayerRef? secondaryTarget
-) : Payload
+) : IPayload
 {
 	public string? EventName { get; } = eventName;
 	public string? Type { get; } = type;

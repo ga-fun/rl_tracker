@@ -120,7 +120,7 @@ public sealed partial class Driver : Notifier
 		else
 		{
 			bool portChanged = newConfig.StatsApiConfig.Port != Config.StatsApiConfig.Port;
-			bool psrChanged = newConfig.StatsApiConfig.PacketSendRate != Config.StatsApiConfig.PacketSendRate;
+			bool psrChanged = !Maths.DoublesAreEqual(newConfig.StatsApiConfig.PacketSendRate, Config.StatsApiConfig.PacketSendRate);
 			bool epicDirChanged = newConfig.EpicInstall.InstallDir != Config.EpicInstall.InstallDir;
 			bool steamDirChanged = newConfig.SteamInstall.InstallDir != Config.SteamInstall.InstallDir;
 
@@ -144,7 +144,7 @@ public sealed partial class Driver : Notifier
 		}
 	}
 
-	private Connection.ExceptionAction OnException(Exception exception)
+	private static Connection.ExceptionAction OnException(Exception exception)
 	{
 		Log.PrintRed($"Connection exception: {exception.GetType().Name}: {exception.Message}.");
 		// TODO

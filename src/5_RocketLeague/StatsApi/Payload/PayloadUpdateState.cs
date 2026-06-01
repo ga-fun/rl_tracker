@@ -4,7 +4,7 @@ public sealed class PayloadUpdateState(
 	string? matchGuid,
 	IReadOnlyList<Player>? players,
 	Game? game
-) : Payload
+) : IPayload
 {
 	public string? MatchGuid { get; } = matchGuid;
 	public IReadOnlyList<Player>? Players { get; } = players;

@@ -8,7 +8,7 @@ public sealed class PayloadGoalScored(
 	PlayerRef? scorer,
 	PlayerRef? assister,
 	BallLastTouch? ballLastTouch
-) : Payload
+) : IPayload
 {
 	public string? MatchGuid { get; } = matchGuid;
 	public double? GoalSpeed { get; } = goalSpeed;

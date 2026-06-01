@@ -1,5 +1,5 @@
 namespace GuillaumeAst.RocketLeague.StatsApi;
 
-public abstract class Payload
+public interface IPayload
 {
 }

@@ -6,7 +6,7 @@ public sealed class PayloadCrossbarHit(
 	double? ballSpeed,
 	double? impactForce,
 	BallLastTouch? ballLastTouch
-) : Payload
+) : IPayload
 {
 	public string? MatchGuid { get; } = matchGuid;
 	public Vector? BallLocation { get; } = ballLocation;

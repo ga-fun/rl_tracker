@@ -85,7 +85,7 @@ public sealed class Event
 	}
 
 	private static Payload ParsePayload<T>(JsonDocument document)
-		where T : Payload
+		where T : IPayload
 	{
 		const string field = "Data";
 		string json;
