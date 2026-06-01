@@ -173,6 +173,7 @@ public sealed class Connection : Notifier
 		{
 			Log.PrintYellow($"Connection failed: {exception.GetType().Name}: {exception.Message}.");
 			Log.Dump(state, "=> NETWORK STATE DUMP:");
+			Console.WriteLine(state.Client.Port)
 		}
 		state.ShouldWait = true;
 	}

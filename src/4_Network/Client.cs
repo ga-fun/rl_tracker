@@ -13,6 +13,7 @@ internal sealed class Client(int port) : IDisposable
 
 	internal async Task ConnectAsync(CancellationToken token = default)
 	{
+		Log.PrintRed($"Connecting on uri \"{_uri}\" with token {token}...");
 		await _socket.ConnectAsync(_uri, token);
 		CheckConnection();
 	}
