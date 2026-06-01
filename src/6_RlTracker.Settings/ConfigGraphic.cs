@@ -1,7 +1,8 @@
-namespace RlTracker.Core;
+using GuillaumeAst.Utils;
 
-// TODO: move it to RlTracker.Ui
-public sealed class ConfigGraphic : Notifier
+namespace GuillaumeAst.RlTracker.Settings;
+
+public sealed class ConfigUI : Notifier
 {
 	private const string WinPrefixDefault = "✅";
 	private const string LossPrefixDefault = "❌";
@@ -13,7 +14,12 @@ public sealed class ConfigGraphic : Notifier
 		get;
 		set
 		{
-			field = value ?? WinPrefixDefault;
+			string normalized = value ?? WinPrefixDefault;
+			if (field == normalized)
+			{
+				return;
+			}
+			field = normalized;
 			NotifyChange();
 		}
 	} = WinPrefixDefault;
@@ -23,7 +29,12 @@ public sealed class ConfigGraphic : Notifier
 		get;
 		set
 		{
-			field = value ?? LossPrefixDefault;
+			string normalized = value ?? LossPrefixDefault;
+			if (field == normalized)
+			{
+				return;
+			}
+			field = normalized;
 			NotifyChange();
 		}
 	} = LossPrefixDefault;
@@ -33,7 +44,12 @@ public sealed class ConfigGraphic : Notifier
 		get;
 		set
 		{
-			field = value ?? WinStreakPrefixDefault;
+			string normalized = value ?? WinStreakPrefixDefault;
+			if (field == normalized)
+			{
+				return;
+			}
+			field = normalized;
 			NotifyChange();
 		}
 	} = WinStreakPrefixDefault;
@@ -43,7 +59,12 @@ public sealed class ConfigGraphic : Notifier
 		get;
 		set
 		{
-			field = value ?? LossStreakPrefixDefault;
+			string normalized = value ?? LossStreakPrefixDefault;
+			if (field == normalized)
+			{
+				return;
+			}
+			field = normalized;
 			NotifyChange();
 		}
 	} = LossStreakPrefixDefault;

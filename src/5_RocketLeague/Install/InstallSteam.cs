@@ -21,7 +21,7 @@ public sealed class InstallSteam : Install
 
 	public InstallSteam(string? installDir) : base(installDir)
 	{
-		if (installDir == null)
+		if (installDir == null || !IsValid)
 		{
 			AutoDetectInstallDir();
 		}

@@ -1,59 +1,62 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using GuillaumeAst.Utils;
+using GuillaumeAst.RocketLeague;
+using StatsApiConfig = GuillaumeAst.RocketLeague.StatsApi.Config;
 
-namespace RlTracker.Core;
+namespace GuillaumeAst.RlTracker.Settings;
 
 public sealed partial class Config : Notifier
 {
 	[JsonConstructor]
 	private Config(){}
 	private const double ApiSendPacketRateDefault = 30;
+	private const string ConfigRelativeDir = "RlTracker";
+	private const string ConfigFileName = "settings.json";
 	private static readonly JsonSerializerOptions JsonOptions = new(){ WriteIndented = true };
-	private static readonly string ConfigFile = Path.Combine(
-		Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-		"RlTracker",
-		"settings.json");
+	private static readonly string ConfigFile = GetConfigFile();
 
-	// TODO: placeholder (waiting for RlTracker.Ui implementation)
-	public ConfigGraphic WpfConfig
+	private static string GetConfigFile()
 	{
-		get;
-		set
+		string? configRootDir = null;
+		try
 		{
-			field = value ?? new();
-			NotifyChange();
+			configRootDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 		}
-	} = new();
+		catch (PlatformNotSupportedException)
+		{}
+		if (string.IsNullOrWhiteSpace(configRootDir))
+		{
+			try
+			{
+				configRootDir = Environment.GetEnvironmentVariable("HOME");
+			}
+			catch (System.Security.SecurityException)
+			{}
+		}
+		if (string.IsNullOrWhiteSpace(configRootDir))
+		{
+			try
+			{
+				configRootDir = Environment.GetEnvironmentVariable("USERPROFILE");
+			}
+			catch (System.Security.SecurityException)
+			{}
+		}
+		if (string.IsNullOrWhiteSpace(configRootDir))
+		{
+			return Path.Combine(AppContext.BaseDirectory, ConfigFileName);
+		}
+		return Path.Combine(configRootDir, ConfigRelativeDir, ConfigFileName);
+	}
 
-	public RlStatsApi.Config StatsApiConfig
-	{
-		get;
-		set
-		{
-			field = value ?? new(null, ApiSendPacketRateDefault);
-			NotifyChange();
-		}
-	} = new(null, ApiSendPacketRateDefault);
+	public ConfigUI ConfigUI { get; } = new();
 
-	public RlInstallEpic EpicInstall
-	{
-		get;
-		set
-		{
-			field = value;
-			NotifyChange();
-		}
-	} = new(null);
+	public StatsApiConfig StatsApiConfig { get; } = new(null, ApiSendPacketRateDefault);
+
+	public InstallEpic EpicInstall { get; } = new(null);
 	
-	public RlInstallSteam SteamInstall
-	{
-		get;
-		set
-		{
-			field = value;
-			NotifyChange();
-		}
-	} = new(null);
+	public InstallSteam SteamInstall { get; } = new(null);
 
 	public static Config Load()
 	{
@@ -72,13 +75,14 @@ public sealed partial class Config : Notifier
 				Log.Dump(configMaybe, $"{Log.Green}Config loaded:");
 				return configMaybe;
 			}
-			else
-			{
-				Log.PrintRed("Unable to parse config.");
-				return CreateDefault();
-			}
+			Log.PrintRed("Unable to parse config.");
+			return CreateDefault();
 		}
-		catch (Exception exception)
+		catch (Exception exception) when (exception
+			is IOException
+			or UnauthorizedAccessException
+			or System.Security.SecurityException
+			or JsonException)
 		{
 			Log.PrintRed($"Config loading failed: {exception.Message}.");
 			return CreateDefault();
@@ -106,12 +110,14 @@ public sealed partial class Config : Notifier
 		string? directory = Path.GetDirectoryName(ConfigFile);
 
 		if (!string.IsNullOrWhiteSpace(directory))
+		{
 			Directory.CreateDirectory(directory);
+		}
 		string json = JsonSerializer.Serialize(this, JsonOptions);
 		Log.Print("Config serialized:");
 		Console.WriteLine(json);
 		File.WriteAllText(ConfigFile, json);
-		Log.PrintGreen($"Config saved to: {Log.Blue}\"{ConfigFile}\"");
+		Log.PrintGreen($"Config saved to: {Log.Blue}\"{ConfigFile}\"${Log.Reset}.");
 	}
 
 	private static Config CreateDefault()

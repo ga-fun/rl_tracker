@@ -5,11 +5,23 @@ namespace GuillaumeAst.RocketLeague;
 
 public abstract class Install : Notifier
 {
-	protected static readonly string ProgramFilesDir = Environment.GetFolderPath(
+	protected static readonly string ProgramFilesDir = GetSpecialFolderOrEmpty(
 		Environment.SpecialFolder.ProgramFiles);
-	protected static readonly string ProgramFilesX86Dir = Environment.GetFolderPath(
+	protected static readonly string ProgramFilesX86Dir = GetSpecialFolderOrEmpty(
 		Environment.SpecialFolder.ProgramFilesX86);
 	protected const string GamesDirName = "Games";
+
+	private static string GetSpecialFolderOrEmpty(Environment.SpecialFolder folder)
+	{
+		try
+		{
+			return Environment.GetFolderPath(folder);
+		}
+		catch (PlatformNotSupportedException)
+		{
+			return "";
+		}
+	}
 
 	public string? InstallDir
 	{

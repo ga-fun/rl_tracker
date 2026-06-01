@@ -39,7 +39,7 @@ public sealed class InstallEpic : Install
 
 	public InstallEpic(string? installDir) : base(installDir)
 	{
-		if (installDir == null)
+		if (installDir == null || !IsValid)
 		{
 			AutoDetectInstallDir();
 		}

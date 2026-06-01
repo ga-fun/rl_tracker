@@ -1,3 +1,9 @@
+# TEST
+
+- ⚠️ `InstallSteam` et `InstallEpic` constructors:
+	- If `installDir != null && isValid == false` => `AutoDetectInstallDir()`
+- ⚠️ `Settings.Config` deserialization
+
 # REFACTOR
 
 - Namespaces `GuillaumeAst.`:
