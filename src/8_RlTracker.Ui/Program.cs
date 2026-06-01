@@ -1,6 +1,7 @@
-﻿using RlTracker.Core;
+﻿using GuillaumeAst.RlTracker.Core;
+using GuillaumeAst.Utils;
 
-namespace RlTracker.Cli;
+namespace GuillaumeAst.RlTracker.Ui;
 
 internal static class Program
 {

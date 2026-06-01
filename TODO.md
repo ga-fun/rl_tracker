@@ -6,6 +6,10 @@
 
 # REFACTOR
 
+- ⚠️ Dans les `setters` => remplacer :
+	- `if (field == value) { return; }`
+	- par `if (field != value) { ... }`
+
 - Namespaces `GuillaumeAst.`:
 ```cs
 // Au lieu de

@@ -18,8 +18,8 @@
   <Folder Name="/src/6_RlTracker.Settings/">
     <Project Path="src/6_RlTracker.Settings/RlTracker.Settings.csproj" />
   </Folder>
-  <Folder Name="/src/7_RlTracker.Driver/">
-    <Project Path="src/7_RlTracker.Driver/RlTracker.Driver.csproj" />
+  <Folder Name="/src/7_RlTracker.Core/">
+    <Project Path="src/7_RlTracker.Core/RlTracker.Core.csproj" />
   </Folder>
   <Folder Name="/src/8_RlTracker.Ui/">
     <Project Path="src/8_RlTracker.Ui/RlTracker.Ui.csproj" />

@@ -17,7 +17,8 @@ public sealed class Connection : Notifier
 		Connected,		// Connected
 		Reconnecting,	// Trying to reconnect after initial connection success
 		Disconnecting,	// Voluntary disconnecting
-		Disconnected	// Not connected and not trying to connect
+		Disconnected,	// Not connected and not trying to connect
+		Count
 	}
 
 	private sealed class State(int port, CancellationToken token)

@@ -1,6 +1,7 @@
-using RlStatsApi;
+using GuillaumeAst.Utils;
+using GuillaumeAst.RocketLeague.StatsApi;
 
-namespace RlTracker.Core;
+namespace GuillaumeAst.RlTracker.Core;
 
 // `UpdateState` => if `bReplay == true` => ignore it
 
@@ -16,19 +17,19 @@ internal sealed class MessageHandler
 	// TODO
 	internal void HandleEvent(Event apiEvent)
 	{
-		if (apiEvent.Type == RlStatsApi.Type.UpdateState)
+		if (apiEvent.Type == EventType.UpdateState)
 		{
 			// TODO
 		}
-		if (apiEvent.Type == RlStatsApi.Type.GoalScored)
+		if (apiEvent.Type == EventType.GoalScored)
 		{
 			// TODO
 		}
-		if (apiEvent.Type == RlStatsApi.Type.MatchEnded)
+		if (apiEvent.Type == EventType.MatchEnded)
 		{
 			// TODO
 		}
-		if (apiEvent.Type == RlStatsApi.Type.MatchDestroyed)
+		if (apiEvent.Type == EventType.MatchDestroyed)
 		{
 			// TODO
 		}
@@ -38,7 +39,9 @@ internal sealed class MessageHandler
 	private void UpdateSpeed()
 	{
 		if (_timeStartSec == null)
+		{
 			_timeStartSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		}
 		_timeCurrSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 		_messageCount++;
 		MessagePerSec = _messageCount / (double)(_timeCurrSec - _timeStartSec);

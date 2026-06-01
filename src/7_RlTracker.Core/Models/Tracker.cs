@@ -1,4 +1,6 @@
-namespace RlTracker.Core.Models;
+using GuillaumeAst.Utils;
+
+namespace GuillaumeAst.RlTracker.Core.Models;
 
 public sealed class Tracker : Notifier
 {
@@ -7,8 +9,11 @@ public sealed class Tracker : Notifier
 		get;
 		private set
 		{
-			field = value;
-			NotifyChange();
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
 		}
 	} = 0;
 	public uint Loss
@@ -16,8 +21,11 @@ public sealed class Tracker : Notifier
 		get;
 		private set
 		{
-			field = value;
-			NotifyChange();
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
 		}
 	} = 0;
 	public int Streak
@@ -25,8 +33,11 @@ public sealed class Tracker : Notifier
 		get;
 		private set
 		{
-			field = value;
-			NotifyChange();
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
 		}
 	} = 0;
 
@@ -39,10 +50,14 @@ public sealed class Tracker : Notifier
 	public void MinusWin()
 	{
 		if (Win == 0)
+		{
 			return;
+		}
 		Win--;
 		if (Streak > 0)
+		{
 			Streak--;
+		}
 	}
 
 	public void PlusLoss()
@@ -54,10 +69,14 @@ public sealed class Tracker : Notifier
 	public void MinusLoss()
 	{
 		if (Loss == 0)
+		{
 			return;
+		}
 		Loss--;
 		if (Streak < 0)
+		{
 			Streak++;
+		}
 	}
 
 	public void Reset()

@@ -1,30 +1,64 @@
-using RlStatsApi;
-using RlTracker.Core.Models;
+using System.ComponentModel;
+using GuillaumeAst.Utils;
+using GuillaumeAst.Network;
+using GuillaumeAst.RocketLeague;
+using StatsApiEvent = GuillaumeAst.RocketLeague.StatsApi.Event;
+using GuillaumeAst.RlTracker.Settings;
+using GuillaumeAst.RlTracker.Core.Models;
 
-namespace RlTracker.Core;
+namespace GuillaumeAst.RlTracker.Core;
 
-public sealed partial class Driver
+public sealed partial class Driver : Notifier
 {
 	public static Driver Instance { get; } = new();
-	public Config Config { get; private set; }
-	public bool RlNotFound { get; private set; } = false;
+	public Config Config
+	{
+		get;
+		private set
+		{
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
+		}
+	}
+	public bool RlNotFound
+	{
+		get;
+		private set
+		{
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
+		}
+	} = false;
 	public bool RlNeedRestart {
 		get;
 		private set
 		{
-			field = value && RlProcess.IsRunning();
+			bool newValue = value && RlProcess.IsRunning();
+			if (field != newValue)
+			{
+				field = newValue;
+				NotifyChange();
+			}
 		}
 	} = false;
-	public State State { get; set; } = new(State.ConnectionStatus.Disconnected);
 
-	private readonly ConnectionManager _connectionManager;
+	public State State { get; } = new();
+	public Connection Connection { get; }
 	private readonly MessageHandler _messageHandler = new();
 	private readonly SemaphoreSlim _gate = new(1, 1);
 
 	private Driver()
 	{
 		Log.Print("Loading...");
-		_connectionManager = new();
+		Connection = new();
+		Connection.MessageReceived += OnMessage;
+		Connection.PropertyChanged += OnConnectionChanged;
 		Config = Config.Load();
 		RlNotFound = RlIsNotFound(Config);
 		Config.Apply(out bool rlNeedRestart);
@@ -37,7 +71,7 @@ public sealed partial class Driver
 		await _gate.WaitAsync();
 		try
 		{
-			UnsafeStart();
+			await UnsafeStart();
 		}
 		finally
 		{
@@ -50,7 +84,7 @@ public sealed partial class Driver
 		await _gate.WaitAsync();
 		try
 		{
-			await _connectionManager.StopAsync();
+			await Connection.StopAsync();
 		}
 		finally
 		{
@@ -80,7 +114,7 @@ public sealed partial class Driver
 		RlNotFound = RlIsNotFound(newConfig);
 		if (RlNotFound)
 		{
-			await _connectionManager.StopAsync();
+			await Connection.StopAsync();
 			RlNeedRestart = false;
 		}
 		else
@@ -99,46 +133,57 @@ public sealed partial class Driver
 		Config = newConfig;
 		Config.Save();
 		Log.PrintGreen("Core config updated.");
-		UnsafeStart();
+		await UnsafeStart();
 	}
 
-	private void UnsafeStart()
+	private async Task UnsafeStart()
 	{
-		if (RlNotFound)
-			return;
-
-		State.ClientStatus = State.ConnectionStatus.Connecting;
-		_connectionManager.StartAsync(
-			Config.StatsApiConfig.Port,
-			OnConnect,
-			OnMessage,
-			OnDisconnect
-		);
+		if (!RlNotFound)
+		{
+			await Connection.StartAsync(Config.StatsApiConfig.Port, OnException);
+		}
 	}
-	
-	private void OnConnect()
+
+	private Connection.ExceptionAction OnException(Exception exception)
 	{
-		State.ClientStatus = State.ConnectionStatus.Connected;
+		Log.PrintRed($"Connection exception: {exception.GetType().Name}: {exception.Message}.");
+		// TODO
+		return Connection.ExceptionAction.Continue;
 	}
 
 	private void OnMessage(string message)
 	{
 		try
 		{
-			Event apiEvent = new(message);
+			StatsApiEvent apiEvent = new(message);
 			_messageHandler.HandleEvent(apiEvent);
 		}
-		catch (Exception exception)
+		catch (Exception exception) when (exception
+			is FormatException
+			or NotSupportedException)
 		{
-			Log.PrintRed($"Message parsing error: {exception.Message}.");
+			Log.PrintRed($"Message parsing error: {exception.GetType().Name}: {exception.Message}.");
+		}
+	}
+
+	private void OnConnectionChanged(object? sender, PropertyChangedEventArgs eventArgs)
+	{
+		if (eventArgs.PropertyName != nameof(Connection.Status))
+		{
+			return;
+		}
+		if (Connection.Status == Connection.ConnectionStatus.Disconnected)
+		{
+			OnDisconnect();
 		}
 	}
 
 	private void OnDisconnect()
 	{
 		if (RlNeedRestart && !RlProcess.IsRunning())
+		{
 			RlNeedRestart = false;
-		State.ClientStatus = State.ConnectionStatus.Disconnected;
+		}
 	}
 
 	private static bool RlIsNotFound(Config config)

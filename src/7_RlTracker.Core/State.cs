@@ -1,40 +1,32 @@
-namespace RlTracker.Core.Models;
+using GuillaumeAst.Utils;
+
+namespace GuillaumeAst.RlTracker.Core.Models;
 
 public sealed class State : Notifier
 {
-	public enum ConnectionStatus
-	{
-		Disconnected,
-		Connecting,
-		Connected
-	}
-
-	public ConnectionStatus ClientStatus
-	{
-		get;
-		set
-		{
-			field = value;
-			NotifyChange();
-		}
-	}
 	public GameMode CurrentGameMode
 	{
 		get;
 		private set
 		{
-			field = value;
-			NotifyChange();
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
 		}
 	}
-	public Tracker[] Trackers { get; }
+	public IReadOnlyList<Tracker> Trackers { get; }
 	public Tracker CurrentTracker
 	{
 		get;
 		private set
 		{
-			field = value;
-			NotifyChange();
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
 		}
 	}
 	public Player? TrackedPlayer
@@ -42,21 +34,24 @@ public sealed class State : Notifier
 		get;
 		set
 		{
-			if (field?.PrimaryId == value?.PrimaryId)
-				return;
-			field = value;
-			ResetTrackers();
-			NotifyChange();
+			if (field?.PrimaryId != value?.PrimaryId || field?.Platform != value?.Platform)
+			{
+				field = value;
+				ResetTrackers();
+				NotifyChange();
+			}
 		}
 	}
 
-	public State(ConnectionStatus clientSatus)
+	public State()
 	{
-		ClientStatus = clientSatus;
 		CurrentGameMode = GameMode.Other;
-		Trackers = new Tracker[(int)GameMode.Count];
-		for (int index = 0; index < Trackers.Length; index++)
-			Trackers[index] = new();
+		Tracker[] trackers = new Tracker[(int)GameMode.Count];
+		for (int index = 0; index < trackers.Length; index++)
+		{
+			trackers[index] = new();
+		}
+		Trackers = trackers;
 		CurrentTracker = Trackers[(int)CurrentGameMode];
 		TrackedPlayer = null;
 	}
@@ -98,20 +93,28 @@ public sealed class State : Notifier
 	public void ResetTrackers()
 	{
 		foreach (Tracker tracker in Trackers)
+		{
 			tracker.Reset();
+		}
 	}
 
 	private void UpdateCurrentTracker(GameMode gameMode)
 	{
-		if (gameMode == CurrentGameMode)
-			return;
-		CurrentGameMode = gameMode;
-		CurrentTracker = Trackers[(int)gameMode];
+		if (gameMode != CurrentGameMode)
+		{
+			CurrentGameMode = gameMode;
+			CurrentTracker = Trackers[(int)gameMode];
+		}
 	}
 
 	private static void ValidateGameMode(GameMode gameMode)
 	{
 		if (gameMode < 0 || gameMode >= GameMode.Count)
-			throw new ArgumentOutOfRangeException($"Invalid game mode: {gameMode}");
+		{
+			throw new ArgumentOutOfRangeException(
+				nameof(gameMode),
+				gameMode,
+				$"Invalid game mode {gameMode}: must be between 0 and {GameMode.Count - 1} (inclusive).");
+		}
 	}
 }

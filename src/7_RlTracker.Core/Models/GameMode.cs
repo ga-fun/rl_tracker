@@ -1,4 +1,4 @@
-namespace RlTracker.Core.Models;
+namespace GuillaumeAst.RlTracker.Core.Models;
 
 public enum GameMode
 {
