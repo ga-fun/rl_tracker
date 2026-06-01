@@ -22,7 +22,7 @@ internal sealed class Client(int port) : IDisposable
 			?? throw new IOException("TCP stream is null.");
 		byte[] buffer = new byte[BufferSize];
 		int count = await stream.ReadAsync(buffer, token);
-
+		Console.WriteLine($"===> Received chunk size: {count}");
 		if (count == 0)
 		{
 			throw new IOException("TCP connection closed.");

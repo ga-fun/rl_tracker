@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FileIni")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e19651581f4dd9c1e886f6e2b4cc177656dfef66")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+249843dbd9fb3d4be2c286cd82ce9b1ffaf61793")]
 [assembly: System.Reflection.AssemblyProductAttribute("FileIni")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FileIni")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
