@@ -1,0 +1,12 @@
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\FileIni\debug\FileIni.deps.json
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\FileIni\debug\FileIni.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\FileIni\debug\FileIni.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\FileIni.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\FileIni.AssemblyInfoInputs.cache
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\FileIni.AssemblyInfo.cs
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\FileIni.csproj.CoreCompileInputs.cache
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\FileIni.sourcelink.json
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\FileIni.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\refint\FileIni.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\FileIni.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileIni\debug\ref\FileIni.dll

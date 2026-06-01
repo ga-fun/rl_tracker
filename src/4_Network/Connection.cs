@@ -1,4 +1,4 @@
-using System.Net.WebSockets;
+using System.Net.Sockets;
 using GuillaumeAst.Utils;
 
 namespace GuillaumeAst.Network;
@@ -125,7 +125,9 @@ public sealed class Connection : Notifier
 			{
 				break;
 			}
-			catch (WebSocketException exception)
+			catch (Exception exception) when (exception
+				is IOException
+				or SocketException)
 			{
 				ConnectionFailed(state, exception);
 			}
@@ -172,8 +174,6 @@ public sealed class Connection : Notifier
 		else
 		{
 			Log.PrintYellow($"Connection failed: {exception.GetType().Name}: {exception.Message}.");
-			Log.Dump(state, "=> NETWORK STATE DUMP:");
-			Console.WriteLine(state.Client.Port)
 		}
 		state.ShouldWait = true;
 	}
@@ -186,9 +186,11 @@ public sealed class Connection : Notifier
 		{
 			try
 			{
-				await client.CloseAsync(CancellationToken.None);
+				client.Close();
 			}
-			catch (WebSocketException)
+			catch (Exception exception) when (exception
+				is IOException
+				or SocketException)
 			{}
 			catch (ObjectDisposedException)
 			{}

@@ -1,80 +1,51 @@
-using System.Text;
 using System.Net;
-using System.Net.WebSockets;
-using GuillaumeAst.Utils;
-
-namespace GuillaumeAst.Network;
+using System.Net.Sockets;
+using System.Text;
 
 internal sealed class Client(int port) : IDisposable
 {
 	private const int BufferSize = 8192;
-	private readonly ClientWebSocket _socket = new();
-	private readonly Uri _uri = new($"ws://{IPAddress.Loopback}:{port}");
+	private readonly TcpClient _client = new();
+	private NetworkStream? _stream = null;
+	private readonly IPEndPoint _endpoint = new(IPAddress.Loopback, port);
 
 	internal async Task ConnectAsync(CancellationToken token = default)
 	{
-		Log.PrintRed($"Connecting on uri \"{_uri}\" with token {token}...");
-		await _socket.ConnectAsync(_uri, token);
+		await _client.ConnectAsync(_endpoint, token);
+		_stream = _client.GetStream();
 		CheckConnection();
 	}
 
 	internal async Task<string> ReceiveAsync(CancellationToken token = default)
 	{
+		NetworkStream stream = _stream
+			?? throw new IOException("TCP stream is null.");
 		byte[] buffer = new byte[BufferSize];
-		WebSocketReceiveResult result;
+		int count = await stream.ReadAsync(buffer, token);
 
-		CheckConnection();
-		while (true)
+		if (count == 0)
 		{
-			using MemoryStream stream = new();
-			do
-			{
-				result = await _socket.ReceiveAsync(buffer, token);
-				if (result.MessageType == WebSocketMessageType.Close)
-				{
-					throw new WebSocketException("WebSocket has been closed.");
-				}
-				if (result.MessageType == WebSocketMessageType.Text)
-				{
-					stream.Write(buffer, 0, result.Count);
-				}
-			}
-			while (!result.EndOfMessage);
-
-			if (result.MessageType == WebSocketMessageType.Text)
-			{
-				return Encoding.UTF8.GetString(stream.ToArray());
-			}
-			else
-			{
-				Log.PrintYellow("Binary message ignored.");
-			}
+			throw new IOException("TCP connection closed.");
 		}
+		return Encoding.UTF8.GetString(buffer, 0, count);
 	}
 
-	internal async Task CloseAsync(CancellationToken token = default)
+	internal void Close()
 	{
-		if (_socket.State == WebSocketState.Open
-			|| _socket.State == WebSocketState.CloseReceived)
-		{
-			await _socket.CloseAsync(
-				WebSocketCloseStatus.NormalClosure,
-				"Closing",
-				token
-			);
-		}
+		_client.Close();
 	}
 
 	private void CheckConnection()
 	{
-		if (_socket.State != WebSocketState.Open)
+		if (!_client.Connected || _stream == null)
 		{
-			throw new WebSocketException("WebSocket is not open.");
+			throw new IOException("TCP connection is not open.");
 		}
 	}
 
 	public void Dispose()
 	{
-		_socket.Dispose();
+		_stream?.Dispose();
+		_client.Dispose();
 	}
 }

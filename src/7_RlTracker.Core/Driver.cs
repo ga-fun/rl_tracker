@@ -155,9 +155,7 @@ public sealed partial class Driver : Notifier
 	{
 		try
 		{
-			Log.PrintGreen($"Message received:\n{Log.Reset}{message}");
 			StatsApiEvent apiEvent = new(message);
-			Log.PrintBlue($"EventType = \"{apiEvent.Type}\".");
 			_messageHandler.HandleEvent(apiEvent);
 		}
 		catch (Exception exception) when (exception

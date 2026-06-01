@@ -1,0 +1,16 @@
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\bin\Debug\net10.0\RlStatsApi.deps.json
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\bin\Debug\net10.0\RlStatsApi.dll
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\bin\Debug\net10.0\RlStatsApi.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\bin\Debug\net10.0\FileIni.dll
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\bin\Debug\net10.0\FileIni.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.csproj.AssemblyReference.cache
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.AssemblyInfoInputs.cache
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.AssemblyInfo.cs
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.csproj.CoreCompileInputs.cache
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.sourcelink.json
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.csproj.Up2Date
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.dll
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\refint\RlStatsApi.dll
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\RlStatsApi.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\src\RlStatsApi\obj\Debug\net10.0\ref\RlStatsApi.dll

@@ -88,19 +88,22 @@ public sealed class Event
 		where T : Payload
 	{
 		const string field = "Data";
+		string json;
 		T payload;
 
 		if (!document.RootElement.TryGetProperty(field, out JsonElement property))
 		{
 			throw new FormatException($"Missing field: \"{field}\".");
 		}
-		if (property.ValueKind != JsonValueKind.Object)
+		if (property.ValueKind != JsonValueKind.String)
 		{
-			throw new FormatException($"Invalid field: \"{field}\" is not an object.");
+			throw new FormatException($"Invalid field: \"{field}\" is not a string.");
 		}
+		json = property.GetString()
+			?? throw new FormatException($"Invalid field: \"{field}\".");
 		try
 		{
-			payload = JsonSerializer.Deserialize<T>(property)
+			payload = JsonSerializer.Deserialize<T>(json)
 				?? throw new FormatException($"Invalid payload: {typeof(T).Name}.");
 		}
 		catch (JsonException exception)
