@@ -4,7 +4,7 @@ namespace GuillaumeAst.RocketLeague.StatsApi;
 
 public sealed class Event
 {
-	private static readonly Dictionary<EventType, Func<JsonDocument, Payload>>
+	private static readonly Dictionary<EventType, Func<JsonDocument, IPayload>>
 		PayloadParsers = new()
 		{
 			{ EventType.UpdateState, ParsePayload<PayloadUpdateState> },
@@ -29,7 +29,7 @@ public sealed class Event
 		};
 
 	public EventType Type { get; }
-	public Payload Payload { get; }
+	public IPayload Payload { get; }
 
 	public Event(string rawMessage)
 	{
@@ -50,7 +50,7 @@ public sealed class Event
 				throw new FormatException("Invalid message: Root JSON value must be an object.");
 			}
 			Type = ParseType(document);
-			if (!PayloadParsers.TryGetValue(Type, out Func<JsonDocument, Payload>? parser))
+			if (!PayloadParsers.TryGetValue(Type, out Func<JsonDocument, IPayload>? parser))
 			{
 				throw new NotSupportedException($"Unsupported event: \"{Type}\".");
 			}
@@ -84,7 +84,7 @@ public sealed class Event
 		return type;
 	}
 
-	private static Payload ParsePayload<T>(JsonDocument document)
+	private static IPayload ParsePayload<T>(JsonDocument document)
 		where T : IPayload
 	{
 		const string field = "Data";
