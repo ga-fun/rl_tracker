@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using GuillaumeAst.Utils;
@@ -75,6 +76,7 @@ public sealed partial class Config : Notifier
 			Config? configMaybe = JsonSerializer.Deserialize<Config>(json, JsonOptions);
 			if (configMaybe != null)
 			{
+				configMaybe.SubscribeInstallChanges();
 				Log.Dump(configMaybe, $"{Log.Green}Config loaded:");
 				return configMaybe;
 			}
@@ -127,9 +129,28 @@ public sealed partial class Config : Notifier
 	{
 		Log.Print("Creating default config...");
 		Config config = new();
+		config.SubscribeInstallChanges();
 		config.EpicInstall.AutoDetectInstallDir();
 		config.SteamInstall.AutoDetectInstallDir();
 		config.Save();
 		return config;
+	}
+
+	private void SubscribeInstallChanges()
+	{
+		EpicInstall.PropertyChanged += OnInstallChanged;
+		SteamInstall.PropertyChanged += OnInstallChanged;
+	}
+
+	private void OnInstallChanged(object? sender, PropertyChangedEventArgs eventArgs)
+	{
+		if (eventArgs.PropertyName != nameof(Install.IsValid))
+		{
+			return;
+		}
+		if (sender is Install install && install.IsValid)
+		{
+			Save();
+		}
 	}
 }
