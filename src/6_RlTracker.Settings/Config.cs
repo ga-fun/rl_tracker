@@ -50,13 +50,13 @@ public sealed partial class Config : Notifier
 		return Path.Combine(configRootDir, ConfigRelativeDir, ConfigFileName);
 	}
 
-	public ConfigUI ConfigUI { get; } = new();
+	public ConfigUI ConfigUI { get; init; } = new();
 
-	public StatsApiConfig StatsApiConfig { get; } = new(null, ApiSendPacketRateDefault);
+	public StatsApiConfig StatsApiConfig { get; init; } = new(null, ApiSendPacketRateDefault);
 
-	public InstallEpic EpicInstall { get; } = new(null);
+	public InstallEpic EpicInstall { get; init; } = new();
 	
-	public InstallSteam SteamInstall { get; } = new(null);
+	public InstallSteam SteamInstall { get; init; } = new();
 
 	public static Config Load()
 	{
@@ -69,6 +69,7 @@ public sealed partial class Config : Notifier
 		try
 		{
 			string json = File.ReadAllText(ConfigFile);
+			Log.Print($"Config read:\n{json}");
 			Config? configMaybe = JsonSerializer.Deserialize<Config>(json, JsonOptions);
 			if (configMaybe != null)
 			{
@@ -117,7 +118,7 @@ public sealed partial class Config : Notifier
 		Log.Print("Config serialized:");
 		Console.WriteLine(json);
 		File.WriteAllText(ConfigFile, json);
-		Log.PrintGreen($"Config saved to: {Log.Blue}\"{ConfigFile}\"${Log.Reset}.");
+		Log.PrintGreen($"Config saved to: {Log.Blue}\"{ConfigFile}\"{Log.Reset}.");
 	}
 
 	private static Config CreateDefault()

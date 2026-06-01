@@ -46,7 +46,7 @@ public abstract class Install : Notifier
 	public bool IsValid
 	{
 		get;
-		private set
+		protected set
 		{
 			if (field == value)
 			{
@@ -54,18 +54,6 @@ public abstract class Install : Notifier
 			}
 			field = value;
 			NotifyChange();
-		}
-	}
-
-	protected Install(string? installDir)
-	{
-		if (installDir != null)
-		{
-			InstallDir = installDir;
-		}
-		else
-		{
-			IsValid = false;
 		}
 	}
 

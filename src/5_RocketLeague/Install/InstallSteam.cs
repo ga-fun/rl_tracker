@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using GuillaumeAst.Utils;
 using GuillaumeAst.FileVdf;
 
@@ -19,12 +20,20 @@ public sealed class InstallSteam : Install
 		SteamCommonDirName,
 		SteamRlDirName);
 
-	public InstallSteam(string? installDir) : base(installDir)
+	[JsonConstructor]
+	public InstallSteam(string? installDir)
 	{
+		InstallDir = installDir;
 		if (installDir == null || !IsValid)
 		{
 			AutoDetectInstallDir();
 		}
+	}
+
+	public InstallSteam()
+	{
+		InstallDir = null;
+		IsValid = false;
 	}
 
 	public override void AutoDetectInstallDir()

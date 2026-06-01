@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.Globalization;
 using System.Net;
 using GuillaumeAst.FileIni;
@@ -5,7 +6,7 @@ using GuillaumeAst.Utils;
 
 namespace GuillaumeAst.RocketLeague.StatsApi;
 
-public sealed class Config(int? port, double? packetSendRate) : Notifier
+public sealed class Config : Notifier
 {
 	public static readonly string ConfigFileRelativePath = Path.Combine(
 		"TAGame",
@@ -23,6 +24,18 @@ public sealed class Config(int? port, double? packetSendRate) : Notifier
 	private const string PortKey = "Port";
 	private const string PacketSendRateKey = "PacketSendRate";
 
+	[JsonConstructor]
+	public Config(int port, double packetSendRate)
+		: this((int?)port, (double?)packetSendRate)
+	{
+	}
+
+	public Config(int? port, double? packetSendRate)
+	{
+		Port = NormalizePort(port);
+		PacketSendRate = NormalizePacketSendRate(packetSendRate);
+	}
+
 	public int Port
 	{
 		get;
@@ -36,7 +49,7 @@ public sealed class Config(int? port, double? packetSendRate) : Notifier
 			field = normalized;
 			NotifyChange();
 		}
-	} = NormalizePort(port);
+	}
 	public double PacketSendRate
 	{
 		get;
@@ -50,7 +63,7 @@ public sealed class Config(int? port, double? packetSendRate) : Notifier
 			field = normalized;
 			NotifyChange();
 		}	
-	} = NormalizePacketSendRate(packetSendRate);
+	}
 
 	public void Apply(string rlInstallDir, ref bool rlNeedRestart)
 	{

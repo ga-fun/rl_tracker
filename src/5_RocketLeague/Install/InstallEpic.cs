@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.Text.Json;
 using GuillaumeAst.Utils;
 
@@ -37,12 +38,20 @@ public sealed class InstallEpic : Install
 			"Manifests");
 	}
 
-	public InstallEpic(string? installDir) : base(installDir)
+	[JsonConstructor]
+	public InstallEpic(string? installDir)
 	{
+		InstallDir = installDir;
 		if (installDir == null || !IsValid)
 		{
 			AutoDetectInstallDir();
 		}
+	}
+
+	public InstallEpic()
+	{
+		InstallDir = null;
+		IsValid = false;
 	}
 
 	public override void AutoDetectInstallDir()
