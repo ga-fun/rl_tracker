@@ -58,6 +58,8 @@ public sealed partial class Config : Notifier
 	
 	public InstallSteam SteamInstall { get; init; } = new();
 
+	// TODO: listen for EpicInstall and SteamInstall
+	// If IsValid has changed to true => Save
 	public static Config Load()
 	{
 		Log.Print($"Loading config from: {Log.Blue}\"{ConfigFile}\".");
@@ -125,6 +127,8 @@ public sealed partial class Config : Notifier
 	{
 		Log.Print("Creating default config...");
 		Config config = new();
+		config.EpicInstall.AutoDetectInstallDir();
+		config.SteamInstall.AutoDetectInstallDir();
 		config.Save();
 		return config;
 	}
