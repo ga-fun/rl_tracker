@@ -57,7 +57,7 @@ public sealed partial class Driver : Notifier
 	}
 	public static Driver Instance { get; } = new();
 	
-	private static readonly MessageHandler MessageHandler = new(State);
+	private static readonly ApiEnventHandler ApiEnventHandler = new(State);
 	private static readonly SemaphoreSlim _gate = new(1, 1);
 
 	private Driver()
@@ -161,7 +161,7 @@ public sealed partial class Driver : Notifier
 		try
 		{
 			StatsApiEvent apiEvent = new(message);
-			MessageHandler.HandleEvent(apiEvent);
+			ApiEnventHandler.HandleEvent(apiEvent);
 		}
 		catch (Exception exception) when (exception
 			is FormatException

@@ -1,16 +1,16 @@
 namespace GuillaumeAst.RocketLeague.StatsApi;
 
 public sealed class PayloadStatfeedEvent(
-	string? eventName,
-	string? type,
-	PlayerRef? mainTarget,
-	string? matchGuid,
+	string eventName,
+	string type,
+	PlayerRef mainTarget,
+	string matchGuid,
 	PlayerRef? secondaryTarget
 ) : IPayload
 {
-	public string? EventName { get; } = eventName;
-	public string? Type { get; } = type;
-	public PlayerRef? MainTarget { get; } = mainTarget;
-	public string? MatchGuid { get; } = matchGuid;
+	public string EventName { get; } = eventName;
+	public string Type { get; } = type;
+	public PlayerRef MainTarget { get; } = mainTarget;
+	public string MatchGuid { get; } = matchGuid;
 	public PlayerRef? SecondaryTarget { get; } = secondaryTarget;
 }

@@ -5,7 +5,7 @@ using ApiTeam = GuillaumeAst.RocketLeague.StatsApi.Team;
 
 namespace GuillaumeAst.RlTracker.Core;
 
-internal sealed class MessageHandler(State state)
+internal sealed class ApiEnventHandler(State state)
 {
 	private sealed class MessageSpeed
 	{
@@ -66,17 +66,17 @@ internal sealed class MessageHandler(State state)
 			{
 				_inReplay = true;
 			}
-			if (apiEvent.Type == EventType.ReplayPlaybackEnd)
+			else if (apiEvent.Type == EventType.ReplayPlaybackEnd)
 			{
 				_inReplay = false;
 			}
 			else if (apiEvent.Type == EventType.MatchInitialized)
 			{
-				if (_match?.Guid != ((PayloadMatchInitialized)apiEvent.Payload).MatchGuid)
-				{
-					StopCurrentMatch();
-					_match = new(((PayloadMatchInitialized)apiEvent.Payload).MatchGuid);
-				}
+				StartNewMatch(((PayloadMatchInitialized)apiEvent.Payload).MatchGuid);
+			}
+			else if (apiEvent.Type == EventType.RoundStarted)
+			{
+				StartNewMatch(((PayloadMatchInitialized)apiEvent.Payload).MatchGuid);
 				_match?.HasSTarted = true;
 			}
 			else if (apiEvent.Type == EventType.UpdateState)
@@ -102,12 +102,13 @@ internal sealed class MessageHandler(State state)
 		}
 	}
 
-	private static void GoalScored(PayloadGoalScored payload)
+	private void StartNewMatch(string matchGuid)
 	{
-		double startSpeed = Math.Round(payload.BallLastTouch.Speed);
-		double goalSpeed = Math.Round(payload.GoalSpeed);
-
-		Log.Print($"Goal scored: {startSpeed} km/h -> {goalSpeed} km/h");
+		if (_match?.Guid != matchGuid)
+		{
+			StopCurrentMatch();
+			_match = new(matchGuid);
+		}
 	}
 
 	private void UpdateState(PayloadUpdateState payload)
@@ -122,16 +123,15 @@ internal sealed class MessageHandler(State state)
 	{
 		if (_match?.Guid != payload.MatchGuid)
 		{
-			StopCurrentMatch();
-			_match = new(payload.MatchGuid);
+			StartNewMatch(payload.MatchGuid);
 		}
-		if (_match.HasSTarted == false && payload.Game.TimeSeconds < MatchDurationSec)
+		if (_match?.HasSTarted == false && payload.Game.TimeSeconds < MatchDurationSec)
 		{
 			_match.HasSTarted = true;
 		}
 		if (payload.Game.BHasWinner == true)
 		{
-			_match.WinnerSoFar = GetWinnerTeam(payload);
+			_match?.WinnerSoFar = GetWinnerTeam(payload);
 		}
 	}
 
@@ -209,6 +209,14 @@ internal sealed class MessageHandler(State state)
 				return (Team)team.TeamNum;
 		}
 		return null;
+	}
+
+	private static void GoalScored(PayloadGoalScored payload)
+	{
+		double startSpeed = Math.Round(payload.BallLastTouch.Speed);
+		double goalSpeed = Math.Round(payload.GoalSpeed);
+
+		Log.Print($"Goal scored: {startSpeed} km/h -> {goalSpeed} km/h");
 	}
 
 	private void StopCurrentMatch()
