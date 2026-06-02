@@ -12,9 +12,9 @@ public sealed class Event
 			{ EventType.ClockUpdatedSeconds, ParsePayload<PayloadClockUpdatedSeconds> },
 			{ EventType.CountdownBegin, ParsePayload<PayloadCountdownBegin> },
 			{ EventType.CrossbarHit, ParsePayload<PayloadCrossbarHit> },
-			{ EventType.GoalReplayEnd, ParsePayload<PayloadGoalReplayEnd> },
-			{ EventType.GoalReplayStart, ParsePayload<PayloadGoalReplayStart> },
-			{ EventType.GoalReplayWillEnd, ParsePayload<PayloadGoalReplayWillEnd> },
+			{ EventType.ReplayPlaybackEnd, ParsePayload<PayloadReplayPlaybackEnd> },
+			{ EventType.ReplayPlaybackStart, ParsePayload<PayloadReplayPlaybackStart> },
+			{ EventType.ReplayWillEnd, ParsePayload<PayloadReplayWillEnd> },
 			{ EventType.GoalScored, ParsePayload<PayloadGoalScored> },
 			{ EventType.MatchCreated, ParsePayload<PayloadMatchCreated> },
 			{ EventType.MatchInitialized, ParsePayload<PayloadMatchInitialized> },
@@ -47,12 +47,12 @@ public sealed class Event
 		{
 			if (document.RootElement.ValueKind != JsonValueKind.Object)
 			{
-				throw new FormatException("Invalid message: Root JSON value must be an object.");
+				throw new FormatException("Invalid message: Root JSON value must be an object");
 			}
 			Type = ParseType(document);
 			if (!PayloadParsers.TryGetValue(Type, out Func<JsonDocument, IPayload>? parser))
 			{
-				throw new NotSupportedException($"Unsupported event: \"{Type}\".");
+				throw new NotSupportedException($"Unsupported event: \"{Type}\"");
 			}
 			Payload = parser(document);
 		}
@@ -65,21 +65,21 @@ public sealed class Event
 
 		if (!document.RootElement.TryGetProperty(field, out JsonElement property))
 		{
-			throw new FormatException($"Missing field: \"{field}\".");
+			throw new FormatException($"Missing field: \"{field}\"");
 		}
 		if (property.ValueKind != JsonValueKind.String)
 		{
-			throw new FormatException($"Invalid field: \"{field}\" is not a string.");
+			throw new FormatException($"Invalid field: \"{field}\" is not a string");
 		}
 		value = property.GetString()
-			?? throw new FormatException($"Invalid field: \"{field}\".");
+			?? throw new FormatException($"Invalid field: \"{field}\"");
 		if (!Enum.TryParse(value, out EventType type))
 		{
-			throw new FormatException($"Invalid \"{field}\": \"{value}\".");
+			throw new FormatException($"Invalid \"{field}\": \"{value}\"");
 		}
 		if (Enum.GetName(type) != value)
 		{
-			throw new FormatException($"Invalid \"{field}\": \"{value}\".");
+			throw new FormatException($"Invalid \"{field}\": \"{value}\"");
 		}
 		return type;
 	}
@@ -93,18 +93,18 @@ public sealed class Event
 
 		if (!document.RootElement.TryGetProperty(field, out JsonElement property))
 		{
-			throw new FormatException($"Missing field: \"{field}\".");
+			throw new FormatException($"Missing field: \"{field}\"");
 		}
 		if (property.ValueKind != JsonValueKind.String)
 		{
-			throw new FormatException($"Invalid field: \"{field}\" is not a string.");
+			throw new FormatException($"Invalid field: \"{field}\" is not a string");
 		}
 		json = property.GetString()
-			?? throw new FormatException($"Invalid field: \"{field}\".");
+			?? throw new FormatException($"Invalid field: \"{field}\"");
 		try
 		{
 			payload = JsonSerializer.Deserialize<T>(json)
-				?? throw new FormatException($"Invalid payload: {typeof(T).Name}.");
+				?? throw new FormatException($"Invalid payload: {typeof(T).Name}");
 		}
 		catch (JsonException exception)
 		{

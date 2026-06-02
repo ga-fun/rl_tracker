@@ -11,7 +11,7 @@ internal static class Normalizer
 
 		if (normalized.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
 		{
-			throw new ArgumentException("File path contains invalid characters.");
+			throw new ArgumentException("File path contains invalid characters");
 		}
 		return normalized;
 	}
@@ -38,11 +38,11 @@ internal static class Normalizer
 		RejectLineBreaks("Key", normalized);
 		if (normalized.Contains('='))
 		{
-			throw new ArgumentException("Key must not contain '='.");
+			throw new ArgumentException("Key must not contain '='");
 		}
 		if (normalized.StartsWith(';') || normalized.StartsWith('#') || normalized.StartsWith('['))
 		{
-			throw new ArgumentException("Key must not start with ';', '#' or '['.");
+			throw new ArgumentException("Key must not start with ';', '#' or '['");
 		}
 		return normalized;
 	}
@@ -60,7 +60,7 @@ internal static class Normalizer
 	{
 		if (value.Contains('\n') || value.Contains('\r'))
 		{
-			throw new ArgumentException($"{argName} must not contain line breaks.");
+			throw new ArgumentException($"{argName} must not contain line breaks");
 		}
 	}
 }

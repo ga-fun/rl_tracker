@@ -36,12 +36,12 @@ internal static class Reader
 	{
 		if (!line.EndsWith(']'))
 		{
-			throw new FormatException($"Missing ']' at line {state.LineNumber} of \"{state.DestinationFile.FilePath}\".");
+			throw new FormatException($"Missing ']' at line {state.LineNumber} of \"{state.DestinationFile.FilePath}\"");
 		}
 		string sectionName = line[1..^1].Trim();
 		if (sectionName.Length == 0)
 		{
-			throw new FormatException($"Empty section name at line {state.LineNumber} of \"{state.DestinationFile.FilePath}\".");
+			throw new FormatException($"Empty section name at line {state.LineNumber} of \"{state.DestinationFile.FilePath}\"");
 		}
 		try
 		{
@@ -65,7 +65,7 @@ internal static class Reader
 
 		if (separator < 0)
 		{
-			throw new FormatException($"Missing '=' at line {state.LineNumber} of \"{state.DestinationFile.FilePath}\".");
+			throw new FormatException($"Missing '=' at line {state.LineNumber} of \"{state.DestinationFile.FilePath}\"");
 		}
 		key = line[..separator];
 		value = line[(separator + 1)..];

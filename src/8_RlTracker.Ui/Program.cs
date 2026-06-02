@@ -31,7 +31,7 @@ internal static class Program
 		}
 		catch (Exception exception)
 		{
-			Log.PrintRed($"❌ ERROR: {exception.Message}.");
+			Log.PrintRed($"❌ ERROR: {exception.Message}");
 			return _exitFailure;
 		}
 		finally

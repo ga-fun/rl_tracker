@@ -58,25 +58,24 @@ public sealed partial class Config : Notifier
 	}
 
 	public ConfigUI ConfigUI { get; init; } = new();
-
 	public StatsApiConfig StatsApiConfig { get; init; } = new(null, ApiSendPacketRateDefault);
-
 	public InstallEpic EpicInstall { get; init; } = new();
-	
 	public InstallSteam SteamInstall { get; init; } = new();
+
+	private static bool IsLoading = false;
 
 	public static Config Load()
 	{
-		Log.Print($"Loading config from: {Log.Blue}\"{ConfigFile}\".");
-		if (!File.Exists(ConfigFile))
-		{
-			Log.PrintYellow($"Config file not found.");
-			return CreateDefault();
-		}
+		IsLoading = true;
+		Log.PrintYellow($"Loading config from: {Log.Blue}\"{ConfigFile}\"{Log.Yellow}");
 		try
 		{
+			if (!File.Exists(ConfigFile))
+			{
+				Log.PrintRed($"Config file not found");
+				return CreateDefault();
+			}
 			string json = File.ReadAllText(ConfigFile);
-			Log.Print($"Config read:\n{json}");
 			Config? configMaybe = JsonSerializer.Deserialize<Config>(json, JsonOptions);
 			if (configMaybe != null)
 			{
@@ -92,7 +91,7 @@ public sealed partial class Config : Notifier
 				Log.Dump(configMaybe, $"{Log.Green}Config loaded:");
 				return configMaybe;
 			}
-			Log.PrintRed("Unable to parse config.");
+			Log.PrintRed("Unable to parse config");
 			return CreateDefault();
 		}
 		catch (Exception exception) when (exception
@@ -101,8 +100,12 @@ public sealed partial class Config : Notifier
 			or System.Security.SecurityException
 			or JsonException)
 		{
-			Log.PrintRed($"Config loading failed: {exception.Message}.");
+			Log.PrintRed($"Config loading failed: {exception.Message}");
 			return CreateDefault();
+		}
+		finally
+		{
+			IsLoading = false;
 		}
 	}
 
@@ -112,18 +115,18 @@ public sealed partial class Config : Notifier
 		if (EpicInstall.InstallDir != null && EpicInstall.IsValid)
 		{
 			StatsApiConfig.Apply(EpicInstall.InstallDir, ref rlNeedRestart);
-			Log.PrintGreen("Epic config applied.");
+			Log.PrintGreen("Epic config applied");
 		}
 		if (SteamInstall.InstallDir != null && SteamInstall.IsValid)
 		{
 			StatsApiConfig.Apply(SteamInstall.InstallDir, ref rlNeedRestart);
-			Log.PrintGreen("Steam config applied.");
+			Log.PrintGreen("Steam config applied");
 		}
 	}
 
 	public void Save()
 	{
-		Log.Dump(this, "Saving config:");
+		Log.PrintYellow("Saving config...");
 		string? directory = Path.GetDirectoryName(ConfigFile);
 
 		if (!string.IsNullOrWhiteSpace(directory))
@@ -131,15 +134,13 @@ public sealed partial class Config : Notifier
 			Directory.CreateDirectory(directory);
 		}
 		string json = JsonSerializer.Serialize(this, JsonOptions);
-		Log.Print("Config serialized:");
-		Console.WriteLine(json);
 		File.WriteAllText(ConfigFile, json);
-		Log.PrintGreen($"Config saved to: {Log.Blue}\"{ConfigFile}\"{Log.Reset}.");
+		Log.PrintGreen($"Config saved to: {Log.Blue}\"{ConfigFile}\"{Log.Reset}");
 	}
 
 	private static Config CreateDefault()
 	{
-		Log.Print("Creating default config...");
+		Log.PrintYellow("Creating default config...");
 		Config config = new();
 		config.SubscribeInstallChanges();
 		config.EpicInstall.AutoDetectInstallDir();
@@ -156,7 +157,7 @@ public sealed partial class Config : Notifier
 
 	private void OnInstallChanged(object? sender, PropertyChangedEventArgs eventArgs)
 	{
-		if (eventArgs.PropertyName != nameof(Install.IsValid))
+		if (IsLoading || eventArgs.PropertyName != nameof(Install.IsValid))
 		{
 			return;
 		}

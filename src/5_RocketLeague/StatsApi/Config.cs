@@ -106,7 +106,7 @@ public sealed class Config : Notifier
 			throw new ArgumentOutOfRangeException(
 				nameof(packetSendRate),
 				packetSendRate,
-				$"Invalid packet send rate {packetSendRate}: must be finite.");
+				$"Invalid packet send rate {packetSendRate}: must be finite");
 		}
 		if (packetSendRate < PacketSendRateMin || packetSendRate > PacketSendRateMax)
 		{
@@ -125,7 +125,7 @@ public sealed class Config : Notifier
 		string trimmedDir = rlInstallDir.Trim();
 		if (!Directory.Exists(trimmedDir))
 		{
-			throw new DirectoryNotFoundException($"Rocket League install dir does not exist: \"{trimmedDir}\".");
+			throw new DirectoryNotFoundException($"Rocket League install dir does not exist: \"{trimmedDir}\"");
 		}
 		
 		string configFilePath = Path.Combine(trimmedDir, ConfigFileRelativePath);

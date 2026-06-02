@@ -1,6 +1,7 @@
 using GuillaumeAst.Utils;
 using GuillaumeAst.RocketLeague.StatsApi;
 using ApiPlayer = GuillaumeAst.RocketLeague.StatsApi.Player;
+using ApiTeam = GuillaumeAst.RocketLeague.StatsApi.Team;
 
 namespace GuillaumeAst.RlTracker.Core;
 
@@ -10,8 +11,8 @@ internal sealed class MessageHandler(State state)
 	{
 		public const long SpeedPrintDelaySec = 300;
 		public long? TimeStartSec = null;
+		public long? TimeLastSpeedPrint = null;
 		public long MessageCount = 0;
-		public long TimeLastSpeedPrint = 0;
 	}
 
 	public sealed class Match(string guid)
@@ -19,8 +20,20 @@ internal sealed class MessageHandler(State state)
 		public string Guid = string.IsNullOrWhiteSpace(guid)
 			? throw new ArgumentException("Match guid must not be null or white-space.", nameof(guid))
 			: guid;
-		public GameMode mode = GameMode.Other;
-		public Team? winnerSoFar;
+		public GameMode Mode = GameMode.Other;
+		public Team? WinnerSoFar;
+		public bool HasSTarted
+		{
+			get;
+			set
+			{
+				if (field ==false && value == true)
+				{
+					Log.Print("Match has started");
+					field = true;
+				}
+			}
+		} = false;
 	}
 
 	private sealed class Player(string name, string id)
@@ -37,92 +50,103 @@ internal sealed class MessageHandler(State state)
 		}
 	}
 
+	private const int MatchDurationSec = 300;
 	private readonly State State = state;
 	private Match? _match;
 	private Player? _player;
 	private MessageSpeed _speed = new();
 	private readonly Lock _gate = new();
+	private bool _inReplay = false;
 
 	internal void HandleEvent(Event apiEvent)
 	{
 		lock (_gate)
 		{
-			if (apiEvent.Type == EventType.MatchInitialized)
+			if (apiEvent.Type == EventType.ReplayPlaybackStart)
 			{
-				StopCurrentMatch();
-				_match = new(((PayloadMatchInitialized)apiEvent.Payload).MatchGuid);
-				Log.Print("----------------------------");
-				Log.Print("Match initialized:");
+				_inReplay = true;
 			}
-			else if (_match == null)
+			if (apiEvent.Type == EventType.ReplayPlaybackEnd)
 			{
-				return;
+				_inReplay = false;
 			}
-			else if (apiEvent.Type == EventType.MatchEnded)
+			else if (apiEvent.Type == EventType.MatchInitialized)
 			{
-				Log.Print("Match ended.");
-				_match?.winnerSoFar = (Team?)((PayloadMatchEnded)apiEvent.Payload).WinnerTeamNum;
-				StopCurrentMatch();
-			}
-			else if (apiEvent.Type == EventType.MatchDestroyed)
-			{
-				Log.Print("Match destroyed.");
-				StopCurrentMatch();
+				if (_match?.Guid != ((PayloadMatchInitialized)apiEvent.Payload).MatchGuid)
+				{
+					StopCurrentMatch();
+					_match = new(((PayloadMatchInitialized)apiEvent.Payload).MatchGuid);
+				}
+				_match?.HasSTarted = true;
 			}
 			else if (apiEvent.Type == EventType.UpdateState)
 			{
 				UpdateState((PayloadUpdateState)apiEvent.Payload);
 			}
-			else if (apiEvent.Type == EventType.GoalScored)
+			else if (apiEvent.Type == EventType.GoalScored && _inReplay == false)
 			{
 				GoalScored((PayloadGoalScored)apiEvent.Payload);
+			}
+			else if (apiEvent.Type == EventType.MatchEnded)
+			{
+				Log.Print("Match ended");
+				_match?.WinnerSoFar = (Team?)((PayloadMatchEnded)apiEvent.Payload).WinnerTeamNum;
+				StopCurrentMatch();
+			}
+			else if (apiEvent.Type == EventType.MatchDestroyed)
+			{
+				Log.Print("Match destroyed");
+				StopCurrentMatch();
 			}
 			PrintSpeed();
 		}
 	}
 
-	// TODO: tmp
 	private static void GoalScored(PayloadGoalScored payload)
 	{
-		double startSpeed = payload.BallLastTouch.Speed * 0.036;
-		double goalSpeed = payload.GoalSpeed * 0.036;
+		double startSpeed = Math.Round(payload.BallLastTouch.Speed);
+		double goalSpeed = Math.Round(payload.GoalSpeed);
 
-		Log.Print($"Goal scored: {startSpeed} km/h -> {goalSpeed} km/h.");
+		Log.Print($"Goal scored: {startSpeed} km/h -> {goalSpeed} km/h");
 	}
 
 	private void UpdateState(PayloadUpdateState payload)
 	{
-		if (_match == null)
-		{
-			_match = new(payload.MatchGuid);
-		}
-		else if (_match.Guid != payload.MatchGuid)
-		{
-			StopCurrentMatch();
-			_match = new(payload.MatchGuid);
-		}
-		SetGameMode(payload);
+		UpdateMatch(payload);
+		UpdateMode(payload);
 		UpdatePlayer(payload);
 		UpdateScore(payload);
 	}
 
-	private void SetGameMode(PayloadUpdateState payload)
+	private void UpdateMatch(PayloadUpdateState payload)
 	{
-		if (_match?.mode != GameMode.Other)
+		if (_match?.Guid != payload.MatchGuid)
+		{
+			StopCurrentMatch();
+			_match = new(payload.MatchGuid);
+		}
+		if (_match.HasSTarted == false && payload.Game.TimeSeconds < MatchDurationSec)
+		{
+			_match.HasSTarted = true;
+		}
+		if (payload.Game.BHasWinner == true)
+		{
+			_match.WinnerSoFar = GetWinnerTeam(payload);
+		}
+	}
+
+	private void UpdateMode(PayloadUpdateState payload)
+	{
+		if (_match == null || payload.Players.Count == 1)
 		{
 			return;
 		}
-
-		int teamSize = payload.Players.Count / 2;
-		if (teamSize >= (int)GameMode.OneVersusOne && teamSize <= (int)GameMode.ThreeVersusThree)
+		int teamSize = (payload.Players.Count + 1) / 2;
+		if (teamSize > (int)_match.Mode && teamSize < (int)GameMode.Count)
 		{
-			_match?.mode = (GameMode)teamSize;
+			_match?.Mode = (GameMode)teamSize;
+			Log.Print($"Mode selected:     {Log.Yellow}{_match?.Mode}");
 		}
-		else
-		{
-			_match?.mode = GameMode.Other;
-		}
-		Log.Print($"Mode selected: {_match?.mode}");
 	}
 
 	private void UpdatePlayer(PayloadUpdateState payload)
@@ -133,42 +157,37 @@ internal sealed class MessageHandler(State state)
 			ApiPlayer? apiPlayer = GetApiPlayer(payload);
 			if (apiPlayer == null)
 			{
-				Log.PrintRed("Player not found.");
+				Log.PrintRed("Player not found");
 				return;
 			}
 
 			if (_player == null || _player.Id != apiPlayer.PrimaryId)
 			{
 				_player = new(apiPlayer.Name, apiPlayer.PrimaryId);
-				Log.PrintGreen($"Player selected: {_player.Name}.");
+				Log.Print($"Player selected: {Log.Yellow}{_player.Name}");
 			}
 			_player.Shortcut = apiPlayer.Shortcut;
 			_player.Team = (Team)apiPlayer.TeamNum;
-			Log.PrintYellow($"Player updated: Team {_player.Team} ({_player.Shortcut}).");
+			Log.Print($"Player updated:  {Log.Yellow}Team {_player.Team} ({_player.Shortcut})");
 		}
 	}
 
 	private void UpdateScore(PayloadUpdateState payload)
 	{
-		Team previousWinner = _match?.winnerSoFar ?? Team.None;
 		int blueScore = payload.Game.Teams[(int)Team.Blue].Score;
 		int orangeScore = payload.Game.Teams[(int)Team.Orange].Score;
 
 		if (blueScore > orangeScore)
 		{
-			_match?.winnerSoFar = Team.Blue;
+			_match?.WinnerSoFar = Team.Blue;
 		}
 		else if (orangeScore > blueScore)
 		{
-			_match?.winnerSoFar = Team.Orange;
+			_match?.WinnerSoFar = Team.Orange;
 		}
 		else
 		{
-			_match?.winnerSoFar = Team.None;
-		}
-		if (_match?.winnerSoFar != previousWinner)
-		{
-			Log.Print($"Winner so far = {_match?.winnerSoFar} [{Log.Blue}{blueScore}{Log.Reset} - {Log.Yellow}{orangeScore}{Log.Reset}].");
+			_match?.WinnerSoFar = Team.None;
 		}
 	}
 
@@ -182,36 +201,61 @@ internal sealed class MessageHandler(State state)
 		return null;
 	}
 
+	private static Team? GetWinnerTeam(PayloadUpdateState payload)
+	{
+		foreach (ApiTeam team in payload.Game.Teams)
+		{
+			if (team.Name == payload.Game.Winner)
+				return (Team)team.TeamNum;
+		}
+		return null;
+	}
+
 	private void StopCurrentMatch()
 	{
-		if (_match != null && _match.winnerSoFar != null && _player != null && _player.Team != null)
+		if (_match != null && _match.HasSTarted == true && _match.WinnerSoFar != null && _player != null && _player.Team != null)
 		{
-			if (_player.Team == _match.winnerSoFar)
+			string Mode = "???";
+			if (_match.Mode == GameMode.OneVersusOne)
 			{
-				State.PlusWin(_match.mode);
-				Log.PrintGreen($"===> WIN! <===");
+				Mode = "1v1";
+			}
+			else if (_match.Mode == GameMode.TwoVersusTwo)
+			{
+				Mode = "2v2";
+			}
+			else if (_match.Mode == GameMode.ThreeVersusThree)
+			{
+				Mode = "3v3";
+			}
+			if (_player.Team == _match.WinnerSoFar)
+			{
+				State.PlusWin(_match.Mode);
+				Log.PrintGreen($"=> [{Mode}] WIN!");
 			}
 			else
 			{
-				State.PlusLoss(_match.mode);
-				Log.PrintRed($"===> LOSS <===");
+				State.PlusLoss(_match.Mode);
+				Log.PrintRed($"=> [{Mode}] LOSS");
 			}
-			Log.PrintBlue("----------------------------");
-			Log.PrintBlue($" {State.CurrentTracker.Win} - {State.CurrentTracker.Loss} - {State.CurrentTracker.Streak}");
-			Log.PrintBlue("----------------------------");
+			Log.PrintBlue("-------------");
+			Log.PrintBlue($" {State.CurrentTracker.Win} | {State.CurrentTracker.Loss} | {State.CurrentTracker.Streak}");
+			Log.PrintBlue("-------------");
 		}
-		_match = null;
 		_player?.Reset();
+		_inReplay = false;
 	}
 
 	private void PrintSpeed()
 	{
-		_speed.TimeStartSec ??= DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-		long _timeCurrSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 		_speed.MessageCount++;
-		double messagePerSec = _speed.MessageCount / (double)(_timeCurrSec - _speed.TimeStartSec);
+		_speed.TimeStartSec ??= DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		_speed.TimeLastSpeedPrint ??= DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		long _timeCurrSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		
 		if (_timeCurrSec - _speed.TimeLastSpeedPrint >= MessageSpeed.SpeedPrintDelaySec)
 		{
+			double messagePerSec = _speed.MessageCount / (double)(_timeCurrSec - _speed.TimeStartSec);
 			Log.PrintBlue($"[{messagePerSec}/sec]");
 			_speed.TimeLastSpeedPrint = _timeCurrSec;
 		}

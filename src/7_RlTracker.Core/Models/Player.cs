@@ -27,12 +27,12 @@ public sealed class Player
 		string[] parts = primaryId.Split('|');
 		if (parts.Length != 3)
 		{
-			throw new FormatException($"Invalid primaryId format: \"{primaryId}\".");
+			throw new FormatException($"Invalid primaryId format: \"{primaryId}\"");
 		}
 		if (!Enum.TryParse(parts[0], ignoreCase: true, out PlatformType platform)
 			|| !string.Equals(Enum.GetName(platform), parts[0], StringComparison.OrdinalIgnoreCase))
 		{
-			throw new FormatException($"Unknown platform: \"{parts[0]}\".");
+			throw new FormatException($"Unknown platform: \"{parts[0]}\"");
 		}
 		Name = name;
 		PrimaryId = primaryId;

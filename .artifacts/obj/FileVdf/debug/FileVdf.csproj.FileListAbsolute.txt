@@ -1,0 +1,12 @@
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\FileVdf\debug\FileVdf.deps.json
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\FileVdf\debug\FileVdf.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\FileVdf\debug\FileVdf.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\FileVdf.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\FileVdf.AssemblyInfoInputs.cache
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\FileVdf.AssemblyInfo.cs
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\FileVdf.csproj.CoreCompileInputs.cache
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\FileVdf.sourcelink.json
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\FileVdf.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\refint\FileVdf.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\FileVdf.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\FileVdf\debug\ref\FileVdf.dll

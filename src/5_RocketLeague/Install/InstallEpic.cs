@@ -55,11 +55,11 @@ public sealed class InstallEpic : Install
 	{
 		if (TryFindFromManifests() || TryFindFromClassicPaths())
 		{
-			Log.PrintGreen($"RL Epic dir detected: {Log.Blue}\"{InstallDir}\".");
+			Log.PrintGreen($"RL Epic dir detected: {Log.Blue}\"{InstallDir}\"");
 		}
 		else
 		{
-			Log.PrintYellow("RL Epic dir not detected.");
+			Log.PrintYellow("RL Epic dir not detected");
 		}
 	}
 

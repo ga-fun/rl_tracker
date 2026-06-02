@@ -32,11 +32,11 @@ public sealed class IniFile(string filePath)
 
 		if (!Content.TryGetValue(sectionKey, out Dictionary<string, string>? section))
 		{
-			throw new KeyNotFoundException($"Section \"{sectionKey}\" not found in \"{FilePath}\".");
+			throw new KeyNotFoundException($"Section \"{sectionKey}\" not found in \"{FilePath}\"");
 		}
 		if (!section.TryGetValue(pairKey, out string? value))
 		{
-			throw new KeyNotFoundException($"Key \"{pairKey}\" not found in section \"{sectionKey}\" of \"{FilePath}\".");
+			throw new KeyNotFoundException($"Key \"{pairKey}\" not found in section \"{sectionKey}\" of \"{FilePath}\"");
 		}
 		return value;
 	}

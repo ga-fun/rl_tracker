@@ -7,9 +7,9 @@ public enum EventType
 	ClockUpdatedSeconds,
 	CountdownBegin,
 	CrossbarHit,
-	GoalReplayEnd,
-	GoalReplayStart,
-	GoalReplayWillEnd,
+	ReplayPlaybackEnd,		// GoalReplayEnd
+	ReplayPlaybackStart,	// GoalReplayStart
+	ReplayWillEnd,			// GoalReplayWillEnd
 	GoalScored,
 	MatchCreated,
 	MatchInitialized,

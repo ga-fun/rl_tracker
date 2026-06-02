@@ -52,6 +52,7 @@ public sealed class Connection : Notifier
 	private Task? _listeningTask = null;
 	private Task? _cleanupTask = null;
 	private Func<Exception, ExceptionAction>? _onException = null;
+	private string? _lastExceptionMessage;
 
 	public async Task StartAsync(int port, Func<Exception, ExceptionAction> onException)
 	{
@@ -65,7 +66,6 @@ public sealed class Connection : Notifier
 				await StopInternalAsync(false);
 			}
 			Status = ConnectionStatus.Connecting;
-			Log.Print("Connecting...");
 			_tokenSource = new();
 			_onException = onException;
 			State state = new(port, _tokenSource.Token);
@@ -146,15 +146,14 @@ public sealed class Connection : Notifier
 		state.Client = new(state.Port);
 		await state.Client.ConnectAsync(state.Token);
 		Status = ConnectionStatus.Connected;
-		Log.PrintGreen("Connected.");
+		_lastExceptionMessage = null;
 	}
 	
 	private async Task ListenAsync(State state)
 	{
 		Client client = state.Client
-			?? throw new InvalidOperationException("Connection client is null.");
+			?? throw new InvalidOperationException("Connection client is null");
 		
-		Log.Print("Listening...");
 		while (!state.Token.IsCancellationRequested)
 		{
 			string message = await client.ReceiveAsync(state.Token);
@@ -167,12 +166,14 @@ public sealed class Connection : Notifier
 		if (Status == ConnectionStatus.Connected)
 		{
 			Status = ConnectionStatus.Reconnecting;
-			Log.PrintYellow($"Connection lost: {exception.GetType().Name}: {exception.Message}.");
+			Log.PrintRed($"Connection lost: {exception.GetType().Name}: {exception.Message}");
 			TryEvent(Reconnecting, exception);
 		}
-		else
+		else if (_lastExceptionMessage == null || _lastExceptionMessage != exception.Message)
 		{
-			Log.PrintYellow($"Connection failed: {exception.GetType().Name}: {exception.Message}.");
+			_lastExceptionMessage = exception.Message;
+			Log.PrintRed($"Connection failed: {exception.GetType().Name}: {exception.Message}");
+			Log.PrintYellow($"Retrying every {ConnectionRetryDelay} ms...");
 		}
 		state.ShouldWait = true;
 	}
@@ -207,7 +208,6 @@ public sealed class Connection : Notifier
 
 	private static async Task TryWaitAsync(State state)
 	{
-		Log.Print($"Retrying in {ConnectionRetryDelay / 1000} sec...");
 		try
 		{
 			await Task.Delay(ConnectionRetryDelay, state.Token);
@@ -252,7 +252,6 @@ public sealed class Connection : Notifier
 			else
 			{
 				Status = ConnectionStatus.Disconnecting;
-				Log.Print("Disconnecting...");
 				cleanupTask = UnsafeCleanupAsync(calledFromListeningTask);
 				_cleanupTask = cleanupTask;
 			}
@@ -293,7 +292,6 @@ public sealed class Connection : Notifier
 				_listeningTask = null;
 				_cleanupTask = null;
 				Status = ConnectionStatus.Disconnected;
-				Log.PrintGreen("Disconnected.");
 			}
 		}
 	}

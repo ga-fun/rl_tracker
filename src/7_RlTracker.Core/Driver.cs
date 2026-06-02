@@ -62,14 +62,13 @@ public sealed partial class Driver : Notifier
 
 	private Driver()
 	{
-		Log.Print("Loading...");
+		Log.Print($"Logs will be stored in: {Log.Blue}\"{Log.LogFile}\"");
 		Connection.MessageReceived += OnMessage;
 		Connection.PropertyChanged += OnConnectionChanged;
 		Config = Config.Load();
 		RlNotFound = RlIsNotFound(Config);
 		Config.Apply(out bool rlNeedRestart);
 		RlNeedRestart = rlNeedRestart;
-		Log.PrintGreen("Loaded.");
 	}
 
 	public async Task Start()
@@ -138,7 +137,7 @@ public sealed partial class Driver : Notifier
 		}
 		Config = newConfig;
 		Config.Save();
-		Log.PrintGreen("Core config updated.");
+		Log.PrintGreen("Core config updated");
 		await UnsafeStart();
 	}
 
@@ -152,7 +151,7 @@ public sealed partial class Driver : Notifier
 
 	private static Connection.ExceptionAction OnException(Exception exception)
 	{
-		Log.PrintRed($"Connection exception: {exception.GetType().Name}: {exception.Message}.");
+		Log.PrintRed($"Connection exception: {exception.GetType().Name}: {exception.Message}");
 		// TODO
 		return Connection.ExceptionAction.Continue;
 	}
@@ -168,7 +167,7 @@ public sealed partial class Driver : Notifier
 			is FormatException
 			or NotSupportedException)
 		{
-			Log.PrintRed($"Message parsing error: {exception.GetType().Name}: {exception.Message}.");
+			Log.PrintRed($"Message parsing error: {exception.GetType().Name}: {exception.Message}");
 		}
 	}
 
@@ -178,10 +177,20 @@ public sealed partial class Driver : Notifier
 		{
 			return;
 		}
-		Log.PrintYellow($"ConnectionStatus set to \"{Connection.Status}\".");
-		if (Connection.Status == Connection.ConnectionStatus.Disconnected)
+		Connection.ConnectionStatus status = Connection.Status;
+
+		if (status == Connection.ConnectionStatus.Connected)
 		{
+			Log.PrintGreen($"{status}");
+		}
+		else if (status == Connection.ConnectionStatus.Disconnected)
+		{
+			Log.PrintRed($"{status}");
 			OnDisconnect();
+		}
+		else
+		{
+			Log.PrintYellow($"{status}...");
 		}
 	}
 

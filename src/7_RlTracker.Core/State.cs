@@ -108,7 +108,7 @@ public sealed class State : Notifier
 			throw new ArgumentOutOfRangeException(
 				nameof(gameMode),
 				gameMode,
-				$"Invalid game mode {gameMode}: must be between 0 and {GameMode.Count - 1} (inclusive).");
+				$"Invalid game mode {gameMode}: must be between 0 and {GameMode.Count - 1} (inclusive)");
 		}
 	}
 }

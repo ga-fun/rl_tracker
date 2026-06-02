@@ -21,13 +21,12 @@ internal sealed class Client(int port) : IDisposable
 	internal async Task<string> ReceiveAsync(CancellationToken token = default)
 	{
 		NetworkStream stream = _stream
-			?? throw new IOException("TCP stream is null.");
+			?? throw new IOException("TCP stream is null");
 		byte[] buffer = new byte[BufferSize];
 		int count = await stream.ReadAsync(buffer, token);
-		Console.WriteLine($"===> Received chunk size: {count}");
 		if (count == 0)
 		{
-			throw new IOException("TCP connection closed.");
+			throw new IOException("TCP connection closed");
 		}
 		return Encoding.UTF8.GetString(buffer, 0, count);
 	}
@@ -41,7 +40,7 @@ internal sealed class Client(int port) : IDisposable
 	{
 		if (!_client.Connected || _stream == null)
 		{
-			throw new IOException("TCP connection is not open.");
+			throw new IOException("TCP connection is not open");
 		}
 	}
 
