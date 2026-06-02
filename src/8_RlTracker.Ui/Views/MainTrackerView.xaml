@@ -1,0 +1,32 @@
+<UserControl
+	x:Class="GuillaumeAst.RlTracker.Ui.Views.MainTrackerView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Border Padding="12">
+		<StackPanel Orientation="Vertical">
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="{Binding WinPrefix}" />
+				<TextBlock Text=" " />
+				<TextBlock Text="{Binding WinCount}" />
+
+				<TextBlock Text=" | " />
+
+				<TextBlock Text="{Binding LossPrefix}" />
+				<TextBlock Text=" " />
+				<TextBlock Text="{Binding LossCount}" />
+
+				<TextBlock Text=" | " />
+
+				<TextBlock Text="{Binding StreakPrefix}" />
+				<TextBlock Text=" " />
+				<TextBlock Text="{Binding StreakCount}" />
+
+				<TextBlock Text=" | " />
+
+				<Button Content="⚙️" />
+			</StackPanel>
+
+			<TextBlock Text="{Binding Status}" />
+		</StackPanel>
+	</Border>
+</UserControl>
