@@ -26,10 +26,10 @@ jobs:
           dotnet-version: '10.0.x'
       
       - name: Install dependencies
-        run: dotnet restore rl_tracker.slnx
+        run: dotnet restore RlTracker.slnx
       
       - name: Build solution
-        run: dotnet build rl_tracker.slnx --configuration Release --no-restore
+        run: dotnet build RlTracker.slnx --configuration Release --no-restore
       
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
