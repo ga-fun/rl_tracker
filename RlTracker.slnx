@@ -1,0 +1,27 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/1_Utils/">
+    <Project Path="src/1_Utils/Utils.csproj" />
+  </Folder>
+  <Folder Name="/src/2_FileVdf/">
+    <Project Path="src/2_FileVdf/FileVdf.csproj" />
+  </Folder>
+  <Folder Name="/src/3_FileIni/">
+    <Project Path="src/3_FileIni/FileIni.csproj" />
+  </Folder>
+  <Folder Name="/src/4_Network/">
+    <Project Path="src/4_Network/Network.csproj" />
+  </Folder>
+  <Folder Name="/src/5_RocketLeague/">
+    <Project Path="src/5_RocketLeague/RocketLeague.csproj" />
+  </Folder>
+  <Folder Name="/src/6_RlTracker.Settings/">
+    <Project Path="src/6_RlTracker.Settings/RlTracker.Settings.csproj" />
+  </Folder>
+  <Folder Name="/src/7_RlTracker.Core/">
+    <Project Path="src/7_RlTracker.Core/RlTracker.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/8_RlTracker.Ui/">
+    <Project Path="src/8_RlTracker.Ui/RlTracker.Ui.csproj" />
+  </Folder>
+</Solution>
