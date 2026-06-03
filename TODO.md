@@ -1,60 +1,33 @@
 # TODO
 
+- `Network.Client` => Handle `TCP Frames` to avoid parsing errors
 - `RlNotFound` + `RlNeedRestart` => move to `RocketLeague.Config`
-- `Network.Client` => Handle `TCP Frames` ?
-
-## FINAL
-- `RlTracker.Ui.csproj` change `<OutputType>Exe</OutputType>` to `<OutputType>WinExe</OutputType>`
+- Implement UI
 
 ---
 
-# NORME
+# Logs management
 
-- Namespaces `GuillaumeAst.`:
-```cs
-// Au lieu de
-namespace MyNameSpace;
-// Plutôt faire
-namespace GuillaumeAst.MyNameSpace;
-```
+- Add logs levels:
+	- `Debug`
+	- `Info`
+	- `Warning`
+	- `Error`
+- Add log mode (can be choosen in `Config`) (internal name / UI name):
+	- `Debug` / `Debug` (write all logs)
+	- `Info` / `Verbose` (do NOT write `Debug` logs)
+	- `Warning` / `Quiet` (ONLY write `Warning` and `Error` logs)
+	- `Error` / `ErrorOnly` (ONLY write `Error` logs)
+- At startup, auto-delete the oldest logfile while any of these rules is false (can be choosen in `Config`) :
+	- max log files count = 10
+	- max log size = 100 Mo
+	- max log date = 7 days
 
-- Ne pas `throw` si le call system le fait déjà:
-```cs
-// Au lieu de
-if (!File.Exists(file))
-{
-	throw new FileNotFoundException(...);
-}
-string content = File.ReadAllText(file);
-// Plutôt faire
-string content = File.ReadAllText(file);
-```
+---
 
-- Accolades sur les `if`, les boucles etc:
-```cs
-// Au lieu de 
-if (true)
-	DoThis();
-// Plutôt faire
-if (true)
-{
-	DoThis();
-}
-```
+# FINAL
 
-- Ne **JAMAIS** faire de catch **global**:
-```cs
-// Ne pas faire
-try
-{...}
-catch
-{...}
-// Ni
-try
-{...}
-catch (Exception exception)
-{...}
-```
+- `RlTracker.Ui.csproj` change `<OutputType>Exe</OutputType>` to `<OutputType>WinExe</OutputType>`
 
 ---
 

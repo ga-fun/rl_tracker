@@ -1,0 +1,16 @@
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\Network\debug\Network.deps.json
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\Network\debug\Network.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\Network\debug\Network.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\Network\debug\Utils.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\bin\Network\debug\Utils.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.csproj.AssemblyReference.cache
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.AssemblyInfoInputs.cache
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.AssemblyInfo.cs
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.csproj.CoreCompileInputs.cache
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.sourcelink.json
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.csproj.Up2Date
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\refint\Network.dll
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\Network.pdb
+C:\Users\guill\Desktop\repos\rl_tracker\.artifacts\obj\Network\debug\ref\Network.dll

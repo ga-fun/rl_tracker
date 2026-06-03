@@ -1,6 +1,5 @@
 namespace GuillaumeAst.RocketLeague.StatsApi;
 
-public sealed class PayloadReplayPlaybackEnd(string matchGuid) : IPayload
+public sealed class PayloadReplayPlaybackEnd(string matchGuid) : Payload(matchGuid)
 {
-	public string MatchGuid { get; } = matchGuid;
 }

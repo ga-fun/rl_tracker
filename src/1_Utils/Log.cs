@@ -1,4 +1,3 @@
-using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
@@ -6,57 +5,15 @@ namespace GuillaumeAst.Utils;
 
 public static class Log
 {
-	public static readonly string LogFile = GetLogFile();
 	public const string Green = "\u001b[32m";
 	public const string Blue = "\u001b[34m";
 	public const string Red = "\u001b[31m";
 	public const string Yellow = "\u001b[33m";
 	public const string Reset = "\u001b[0m";
-
+	private const string LogFileName = $"{App.AppName}.log";
 	private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 	private static readonly Lock FileGate = new();
-	private const string LogDirName = "logs";
-	private const string LogFileName = "rlTracker.log";
-
-	private static string GetLogFile()
-	{
-		string? LogRootDir = null;
-		try
-		{
-			LogRootDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-		}
-		catch (PlatformNotSupportedException)
-		{
-			// Fallback available
-		}
-		if (string.IsNullOrWhiteSpace(LogRootDir))
-		{
-			try
-			{
-				LogRootDir = Environment.GetEnvironmentVariable("HOME");
-			}
-			catch (System.Security.SecurityException)
-			{
-				// Fallback available
-			}
-		}
-		if (string.IsNullOrWhiteSpace(LogRootDir))
-		{
-			try
-			{
-				LogRootDir = Environment.GetEnvironmentVariable("USERPROFILE");
-			}
-			catch (System.Security.SecurityException)
-			{
-				// Fallback available
-			}
-		}
-		if (string.IsNullOrWhiteSpace(LogRootDir))
-		{
-			return Path.Combine(AppContext.BaseDirectory, LogFileName);
-		}
-		return Path.Combine(LogRootDir, LogDirName, LogFileName);
-	}
+	public static readonly string LogFile = Path.Combine(App.AppDir, LogFileName);
 
 	public static void Dump<T>(
 		T value,

@@ -1,0 +1,136 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "RlTracker.Ui/1.0.0": {
+        "dependencies": {
+          "RlTracker.Core": "1.0.0",
+          "Utils": "1.0.0"
+        },
+        "runtime": {
+          "RlTracker.Ui.dll": {}
+        }
+      },
+      "FileIni/1.0.0": {
+        "runtime": {
+          "FileIni.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "FileVdf/1.0.0": {
+        "runtime": {
+          "FileVdf.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Network/1.0.0": {
+        "dependencies": {
+          "Utils": "1.0.0"
+        },
+        "runtime": {
+          "Network.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "RlTracker.Core/1.0.0": {
+        "dependencies": {
+          "Network": "1.0.0",
+          "RlTracker.Settings": "1.0.0",
+          "RocketLeague": "1.0.0",
+          "Utils": "1.0.0"
+        },
+        "runtime": {
+          "RlTracker.Core.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "RlTracker.Settings/1.0.0": {
+        "dependencies": {
+          "RocketLeague": "1.0.0",
+          "Utils": "1.0.0"
+        },
+        "runtime": {
+          "RlTracker.Settings.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "RocketLeague/1.0.0": {
+        "dependencies": {
+          "FileIni": "1.0.0",
+          "FileVdf": "1.0.0",
+          "Utils": "1.0.0"
+        },
+        "runtime": {
+          "RocketLeague.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Utils/1.0.0": {
+        "runtime": {
+          "Utils.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "RlTracker.Ui/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FileIni/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FileVdf/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Network/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "RlTracker.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "RlTracker.Settings/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "RocketLeague/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Utils/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

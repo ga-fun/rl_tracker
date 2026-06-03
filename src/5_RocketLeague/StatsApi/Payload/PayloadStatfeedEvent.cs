@@ -6,11 +6,10 @@ public sealed class PayloadStatfeedEvent(
 	PlayerRef mainTarget,
 	string matchGuid,
 	PlayerRef? secondaryTarget
-) : IPayload
+) : Payload(matchGuid)
 {
 	public string EventName { get; } = eventName;
 	public string Type { get; } = type;
 	public PlayerRef MainTarget { get; } = mainTarget;
-	public string MatchGuid { get; } = matchGuid;
 	public PlayerRef? SecondaryTarget { get; } = secondaryTarget;
 }

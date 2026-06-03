@@ -6,6 +6,8 @@ namespace GuillaumeAst.RlTracker.Ui;
 
 public partial class App : Application
 {
+	private const int _exitFailure = 1;
+
 	protected override async void OnStartup(StartupEventArgs eventArgs)
 	{
 		base.OnStartup(eventArgs);
@@ -19,7 +21,7 @@ public partial class App : Application
 		catch (Exception exception)
 		{
 			Log.PrintRed($"❌ ERROR: {exception.Message}");
-			Shutdown(1);
+			Shutdown(_exitFailure);
 		}
 	}
 

@@ -12,50 +12,9 @@ public sealed partial class Config : Notifier
 	[JsonConstructor]
 	private Config(){}
 	private const double ApiSendPacketRateDefault = 30;
-	private const string ConfigRelativeDir = "RlTracker";
 	private const string ConfigFileName = "settings.json";
 	private static readonly JsonSerializerOptions JsonOptions = new(){ WriteIndented = true };
-	private static readonly string ConfigFile = GetConfigFile();
-
-	private static string GetConfigFile()
-	{
-		string? configRootDir = null;
-		try
-		{
-			configRootDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-		}
-		catch (PlatformNotSupportedException)
-		{
-			// Fallback available
-		}
-		if (string.IsNullOrWhiteSpace(configRootDir))
-		{
-			try
-			{
-				configRootDir = Environment.GetEnvironmentVariable("HOME");
-			}
-			catch (System.Security.SecurityException)
-			{
-				// Fallback available
-			}
-		}
-		if (string.IsNullOrWhiteSpace(configRootDir))
-		{
-			try
-			{
-				configRootDir = Environment.GetEnvironmentVariable("USERPROFILE");
-			}
-			catch (System.Security.SecurityException)
-			{
-				// Fallback available
-			}
-		}
-		if (string.IsNullOrWhiteSpace(configRootDir))
-		{
-			return Path.Combine(AppContext.BaseDirectory, ConfigFileName);
-		}
-		return Path.Combine(configRootDir, ConfigRelativeDir, ConfigFileName);
-	}
+	private static readonly string ConfigFile = Path.Combine(App.AppDir, ConfigFileName);
 
 	public ConfigUI ConfigUI { get; init; } = new();
 	public StatsApiConfig StatsApiConfig { get; init; } = new(null, ApiSendPacketRateDefault);

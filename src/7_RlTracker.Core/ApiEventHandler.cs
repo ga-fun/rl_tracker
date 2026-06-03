@@ -7,107 +7,245 @@ namespace GuillaumeAst.RlTracker.Core;
 
 internal sealed class ApiEnventHandler(State state)
 {
-	private sealed class MessageSpeed
+	public enum MatchStatus
 	{
-		public const long SpeedPrintDelaySec = 300;
-		public long? TimeStartSec = null;
-		public long? TimeLastSpeedPrint = null;
-		public long MessageCount = 0;
+		Pending,
+		InProgress,
+		Ended
 	}
 
-	public sealed class Match(string guid)
+	public sealed class Match
 	{
-		public string Guid = string.IsNullOrWhiteSpace(guid)
-			? throw new ArgumentException("Match guid must not be null or white-space.", nameof(guid))
-			: guid;
-		public GameMode Mode = GameMode.Other;
-		public Team? WinnerSoFar;
-		public bool HasSTarted
+		public string Guid { get; }
+		public GameMode Mode
 		{
 			get;
 			set
 			{
-				if (field ==false && value == true)
+				if (field != value)
 				{
-					Log.Print("Match has started");
-					field = true;
+					field = value;
+					Log.Print($"Match.Mode = {Log.Yellow}{field}");
 				}
 			}
-		} = false;
+		}
+		public Team WinnerSoFar
+		{
+			get;
+			set
+			{
+				if (field != value)
+				{
+					field = value;
+					Log.Write($"Match.WinnerSoFar = {field}");
+				}
+			}
+		}
+		public MatchStatus Status
+		{
+			get;
+			set
+			{
+				if (field != value)
+				{
+					field = value;
+					Log.Print($"Match.Status = {Log.Yellow}{field}");
+				}
+			}
+		}
+
+		public Match(string guid)
+		{
+			ArgumentNullException.ThrowIfNull(guid);
+			Log.Write("---");
+			Log.Print("Match created");
+			Guid = guid;
+			Log.Write($"Match.Guid = {guid}");
+			Mode = GameMode.Other;
+			Log.Write($"Match.Mode = {Mode}");
+			WinnerSoFar = Team.None;
+			Log.Write($"Match.WinnerSoFar = {WinnerSoFar}");
+			Status = MatchStatus.Pending;
+			Log.Write($"Match.Status = {Status}");
+			Log.Write("---");
+		}
 	}
 
-	private sealed class Player(string name, string id)
+	private sealed class Player
 	{
-		public readonly string Name = name;
-		public readonly string Id = id;
-		public int? Shortcut;
-		public Team? Team;
+		public string Name
+		{
+			get;
+			set
+			{
+				if (field != value)
+				{
+					field = value;
+					Log.Print($"Player.Name = {Log.Yellow}{field}");
+				}
+			}
+		}
+		public string Id
+		{
+			get;
+			set
+			{
+				if (field != value)
+				{
+					field = value;
+					Log.Write($"Player.Id = {field}");
+				}
+			}
+		}
+		public int? Shortcut
+		{
+			get;
+			set
+			{
+				if (field != value)
+				{
+					field = value;
+					Log.Write($"Player.Shortcut = {field}");
+				}
+			}
+		}
+		public Team? Team
+		{
+			get;
+			set
+			{
+				if (field != value)
+				{
+					field = value;
+					Log.Print($"Player.Team = {Log.Yellow}{field}");
+				}
+			}
+		}
+
+		public Player(string name, string id)
+		{
+			Log.Write("---");
+			Log.Write("Player created");
+			Name = name;
+			Id = id;
+			Shortcut = null;
+			Log.Write($"Player.Shortcut = {Shortcut}");
+			Team = null;
+			Log.Write($"Player.Team = {Team}");
+			Log.Write("---");
+		}
 
 		public void Reset()
 		{
+			Log.Write("---");
+			Log.Write("Player.Reset()");
 			Shortcut = null;
 			Team = null;
+			Log.Write("---");
 		}
 	}
 
 	private const int MatchDurationSec = 300;
+	private const string TrainingMatchGuid = "";
 	private readonly State State = state;
-	private Match? _match;
-	private Player? _player;
-	private MessageSpeed _speed = new();
+	private readonly MessageSpeed _speed = new();
 	private readonly Lock _gate = new();
-	private bool _inReplay = false;
+	private Match CurrentMatch { get; set; } = new(TrainingMatchGuid){Status = MatchStatus.Ended};
+	private Player? CurrentPlayer { get; set; }
+	private bool InReplay
+	{
+		get;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				Log.Write($"InReplay = {field}");
+			}
+		}
+	} = false;
+	private static EventType? CurrentEventType
+	{
+		get;
+		set
+		{
+			if (field != value)
+			{
+				field = value;
+				Log.Write("#############################################################");
+				Log.Write($"Handling event {field}");
+			}
+		}
+	}
 
 	internal void HandleEvent(Event apiEvent)
 	{
 		lock (_gate)
 		{
-			if (apiEvent.Type == EventType.ReplayPlaybackStart)
+			CurrentEventType = apiEvent.Type;
+			if (apiEvent.Payload.MatchGuid == TrainingMatchGuid)
 			{
-				_inReplay = true;
+				StopCurrentMatch();
 			}
-			else if (apiEvent.Type == EventType.ReplayPlaybackEnd)
+			else if (apiEvent.Payload.MatchGuid == CurrentMatch.Guid && CurrentMatch.Status == MatchStatus.Ended)
 			{
-				_inReplay = false;
+				_speed.Print();
+				return;
 			}
-			else if (apiEvent.Type == EventType.MatchInitialized)
+			else if (CurrentEventType == EventType.ReplayPlaybackStart)
 			{
-				StartNewMatch(((PayloadMatchInitialized)apiEvent.Payload).MatchGuid);
+				InReplay = true;
 			}
-			else if (apiEvent.Type == EventType.RoundStarted)
+			else if (CurrentEventType == EventType.ReplayPlaybackEnd)
 			{
-				StartNewMatch(((PayloadMatchInitialized)apiEvent.Payload).MatchGuid);
-				_match?.HasSTarted = true;
+				InReplay = false;
 			}
-			else if (apiEvent.Type == EventType.UpdateState)
+			else if (CurrentEventType == EventType.MatchInitialized)
+			{
+				NewMatch(((PayloadMatchInitialized)apiEvent.Payload).MatchGuid);
+			}
+			else if (CurrentEventType == EventType.RoundStarted && CurrentMatch.Status == MatchStatus.Pending)
+			{
+				NewMatch(((PayloadRoundStarted)apiEvent.Payload).MatchGuid);
+				CurrentMatch.Status = MatchStatus.InProgress;
+			}
+			else if (CurrentEventType == EventType.UpdateState)
 			{
 				UpdateState((PayloadUpdateState)apiEvent.Payload);
 			}
-			else if (apiEvent.Type == EventType.GoalScored && _inReplay == false)
+			else if (CurrentEventType == EventType.GoalScored && InReplay == false)
 			{
 				GoalScored((PayloadGoalScored)apiEvent.Payload);
 			}
-			else if (apiEvent.Type == EventType.MatchEnded)
+			else if (CurrentEventType == EventType.MatchEnded)
 			{
-				Log.Print("Match ended");
-				_match?.WinnerSoFar = (Team?)((PayloadMatchEnded)apiEvent.Payload).WinnerTeamNum;
+				CurrentMatch.WinnerSoFar = (Team)((PayloadMatchEnded)apiEvent.Payload).WinnerTeamNum;
 				StopCurrentMatch();
 			}
-			else if (apiEvent.Type == EventType.MatchDestroyed)
+			else if (CurrentEventType == EventType.MatchDestroyed)
 			{
-				Log.Print("Match destroyed");
 				StopCurrentMatch();
 			}
-			PrintSpeed();
+			_speed.Print();
 		}
 	}
 
-	private void StartNewMatch(string matchGuid)
+	private void NewMatch(string matchGuid)
 	{
-		if (_match?.Guid != matchGuid)
+		if (string.IsNullOrWhiteSpace(matchGuid))
+		{
+			if (matchGuid == null)
+				Log.PrintRed($"Training Guid = [null]");
+			else if (string.IsNullOrEmpty(matchGuid))
+				Log.PrintRed($"Training Guid = \"\"");
+			// During training, events are sent with MatchGuid == "" => skip it
+			return;
+		}
+		if (CurrentMatch.Guid != matchGuid)
 		{
 			StopCurrentMatch();
-			_match = new(matchGuid);
+			CurrentMatch = new(matchGuid);
+			InReplay = false;
 		}
 	}
 
@@ -116,97 +254,102 @@ internal sealed class ApiEnventHandler(State state)
 		UpdateMatch(payload);
 		UpdateMode(payload);
 		UpdatePlayer(payload);
-		UpdateScore(payload);
+		if (payload.Game.BHasWinner == true)
+		{
+			StopCurrentMatch();
+		}
 	}
 
 	private void UpdateMatch(PayloadUpdateState payload)
 	{
-		if (_match?.Guid != payload.MatchGuid)
+		if (CurrentMatch.Guid != payload.MatchGuid)
 		{
-			StartNewMatch(payload.MatchGuid);
-		}
-		if (_match?.HasSTarted == false && payload.Game.TimeSeconds < MatchDurationSec)
-		{
-			_match.HasSTarted = true;
+			NewMatch(payload.MatchGuid);
 		}
 		if (payload.Game.BHasWinner == true)
 		{
-			_match?.WinnerSoFar = GetWinnerTeam(payload);
+			CurrentMatch.WinnerSoFar = GetWinnerTeamFromWinnerOrScore(payload);
+			CurrentMatch.Status = MatchStatus.Ended;
 		}
-	}
-
-	private void UpdateMode(PayloadUpdateState payload)
-	{
-		if (_match == null || payload.Players.Count == 1)
+		else
 		{
-			return;
-		}
-		int teamSize = (payload.Players.Count + 1) / 2;
-		if (teamSize > (int)_match.Mode && teamSize < (int)GameMode.Count)
-		{
-			_match?.Mode = (GameMode)teamSize;
-			Log.Print($"Mode selected:     {Log.Yellow}{_match?.Mode}");
-		}
-	}
-
-	private void UpdatePlayer(PayloadUpdateState payload)
-	{
-		if (payload.Game.BReplay == false && payload.Game.Target != null
-			&& _player?.Shortcut != payload.Game.Target.Shortcut)
-		{
-			ApiPlayer? apiPlayer = GetApiPlayer(payload);
-			if (apiPlayer == null)
+			CurrentMatch.WinnerSoFar = GetWinnerTeamFromScore(payload);
+			if (CurrentMatch.Status == MatchStatus.Pending && payload.Game.TimeSeconds < MatchDurationSec)
 			{
-				Log.PrintRed("Player not found");
-				return;
+				CurrentMatch.Status = MatchStatus.InProgress;
 			}
-
-			if (_player == null || _player.Id != apiPlayer.PrimaryId)
-			{
-				_player = new(apiPlayer.Name, apiPlayer.PrimaryId);
-				Log.Print($"Player selected: {Log.Yellow}{_player.Name}");
-			}
-			_player.Shortcut = apiPlayer.Shortcut;
-			_player.Team = (Team)apiPlayer.TeamNum;
-			Log.Print($"Player updated:  {Log.Yellow}Team {_player.Team} ({_player.Shortcut})");
 		}
 	}
 
-	private void UpdateScore(PayloadUpdateState payload)
+	private static Team GetWinnerTeamFromWinnerOrScore(PayloadUpdateState payload)
+	{
+		foreach (ApiTeam team in payload.Game.Teams)
+		{
+			if (team.Name == payload.Game.Winner)
+				return (Team)team.TeamNum;
+		}
+		return GetWinnerTeamFromScore(payload);
+	}
+
+	private static Team GetWinnerTeamFromScore(PayloadUpdateState payload)
 	{
 		int blueScore = payload.Game.Teams[(int)Team.Blue].Score;
 		int orangeScore = payload.Game.Teams[(int)Team.Orange].Score;
 
 		if (blueScore > orangeScore)
 		{
-			_match?.WinnerSoFar = Team.Blue;
+			return Team.Blue;
 		}
 		else if (orangeScore > blueScore)
 		{
-			_match?.WinnerSoFar = Team.Orange;
+			return Team.Orange;
 		}
 		else
 		{
-			_match?.WinnerSoFar = Team.None;
+			return Team.None;
 		}
 	}
 
-	private static ApiPlayer? GetApiPlayer(PayloadUpdateState payload)
+	private void UpdateMode(PayloadUpdateState payload)
 	{
-		foreach (ApiPlayer apiPlayer in payload.Players)
+		if (payload.Players.Count == 1)
 		{
-			if (apiPlayer.Shortcut == payload.Game.Target?.Shortcut)
-				return apiPlayer;
+			return;
 		}
-		return null;
+		int teamSize = (payload.Players.Count + 1) / 2;
+		if (teamSize > (int)CurrentMatch.Mode && teamSize < (int)GameMode.Count)
+		{
+			CurrentMatch.Mode = (GameMode)teamSize;
+		}
 	}
 
-	private static Team? GetWinnerTeam(PayloadUpdateState payload)
+	private void UpdatePlayer(PayloadUpdateState payload)
 	{
-		foreach (ApiTeam team in payload.Game.Teams)
+		if (payload.Game.BReplay == false && payload.Game.Target != null
+			&& CurrentPlayer?.Shortcut != payload.Game.Target.Shortcut)
 		{
-			if (team.Name == payload.Game.Winner)
-				return (Team)team.TeamNum;
+			ApiPlayer? apiPlayer = GetPlayerFromShortcut(payload.Players, payload.Game.Target.Shortcut);
+			if (apiPlayer == null)
+			{
+				Log.Print($"{Log.Red}Player [{payload.Game.Target?.Shortcut}] not found");
+				return;
+			}
+
+			if (CurrentPlayer == null || CurrentPlayer.Id != apiPlayer.PrimaryId)
+			{
+				CurrentPlayer = new(apiPlayer.Name, apiPlayer.PrimaryId);
+			}
+			CurrentPlayer.Shortcut = apiPlayer.Shortcut;
+			CurrentPlayer.Team = (Team)apiPlayer.TeamNum;
+		}
+	}
+
+	private static ApiPlayer? GetPlayerFromShortcut(IReadOnlyList<ApiPlayer> playerList, int shortcut)
+	{
+		foreach (ApiPlayer player in playerList)
+		{
+			if (player.Shortcut == shortcut)
+				return player;
 		}
 		return null;
 	}
@@ -221,51 +364,52 @@ internal sealed class ApiEnventHandler(State state)
 
 	private void StopCurrentMatch()
 	{
-		if (_match != null && _match.HasSTarted == true && _match.WinnerSoFar != null && _player != null && _player.Team != null)
+		if (CurrentMatch.Status == MatchStatus.Ended)
 		{
-			string Mode = "???";
-			if (_match.Mode == GameMode.OneVersusOne)
+			return;
+		}
+		else if (CurrentMatch.Status == MatchStatus.Pending)
+		{
+			Log.Print("Match not started ignored");
+		}
+		else if (CurrentMatch.Status == MatchStatus.InProgress)
+		{
+			if (CurrentPlayer?.Team == null)
 			{
-				Mode = "1v1";
-			}
-			else if (_match.Mode == GameMode.TwoVersusTwo)
-			{
-				Mode = "2v2";
-			}
-			else if (_match.Mode == GameMode.ThreeVersusThree)
-			{
-				Mode = "3v3";
-			}
-			if (_player.Team == _match.WinnerSoFar)
-			{
-				State.PlusWin(_match.Mode);
-				Log.PrintGreen($"=> [{Mode}] WIN!");
+				Log.Print($"{Log.Red}Unable to compute match result because player or player's team is null");
 			}
 			else
 			{
-				State.PlusLoss(_match.Mode);
-				Log.PrintRed($"=> [{Mode}] LOSS");
+				string Mode = "???";
+				if (CurrentMatch.Mode == GameMode.OneVersusOne)
+				{
+					Mode = "1v1";
+				}
+				else if (CurrentMatch.Mode == GameMode.TwoVersusTwo)
+				{
+					Mode = "2v2";
+				}
+				else if (CurrentMatch.Mode == GameMode.ThreeVersusThree)
+				{
+					Mode = "3v3";
+				}
+				if (CurrentPlayer.Team == CurrentMatch.WinnerSoFar)
+				{
+					State.PlusWin(CurrentMatch.Mode);
+					Log.Print($"{Log.Green}=> [{Mode}] WIN!");
+				}
+				else
+				{
+					State.PlusLoss(CurrentMatch.Mode);
+					Log.Print($"{Log.Red}=> [{Mode}] LOSS");
+				}
+				Log.Print($"{Log.Blue}-------------");
+				Log.Print($"{Log.Blue} {State.CurrentTracker.Win} | {State.CurrentTracker.Loss} | {State.CurrentTracker.Streak}");
+				Log.Print($"{Log.Blue}-------------");
 			}
-			Log.PrintBlue("-------------");
-			Log.PrintBlue($" {State.CurrentTracker.Win} | {State.CurrentTracker.Loss} | {State.CurrentTracker.Streak}");
-			Log.PrintBlue("-------------");
 		}
-		_player?.Reset();
-		_inReplay = false;
-	}
-
-	private void PrintSpeed()
-	{
-		_speed.MessageCount++;
-		_speed.TimeStartSec ??= DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-		_speed.TimeLastSpeedPrint ??= DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-		long _timeCurrSec = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-		
-		if (_timeCurrSec - _speed.TimeLastSpeedPrint >= MessageSpeed.SpeedPrintDelaySec)
-		{
-			double messagePerSec = _speed.MessageCount / (double)(_timeCurrSec - _speed.TimeStartSec);
-			Log.PrintBlue($"[{messagePerSec}/sec]");
-			_speed.TimeLastSpeedPrint = _timeCurrSec;
-		}
+		CurrentMatch.Status = MatchStatus.Ended;
+		CurrentPlayer?.Reset();
+		InReplay = false;
 	}
 }
