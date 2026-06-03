@@ -6,25 +6,6 @@
 
 ---
 
-# Logs management
-
-- Add logs levels:
-	- `Debug`
-	- `Info`
-	- `Warning`
-	- `Error`
-- Add log mode (can be choosen in `Config`) (internal name / UI name):
-	- `Debug` / `Debug` (write all logs)
-	- `Info` / `Verbose` (do NOT write `Debug` logs)
-	- `Warning` / `Quiet` (ONLY write `Warning` and `Error` logs)
-	- `Error` / `ErrorOnly` (ONLY write `Error` logs)
-- At startup, auto-delete the oldest logfile while any of these rules is false (can be choosen in `Config`) :
-	- max log files count = 10
-	- max log size = 100 Mo
-	- max log date = 7 days
-
----
-
 # FINAL
 
 - `RlTracker.Ui.csproj` change `<OutputType>Exe</OutputType>` to `<OutputType>WinExe</OutputType>`

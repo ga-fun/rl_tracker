@@ -27,7 +27,7 @@ public partial class App : Application
 
 	protected override async void OnExit(ExitEventArgs eventArgs)
 	{
-		await Driver.Stop();
+		await Driver.Instance.Stop();
 		base.OnExit(eventArgs);
 	}
 }
