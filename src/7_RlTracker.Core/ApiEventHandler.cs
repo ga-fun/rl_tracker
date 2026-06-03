@@ -25,7 +25,7 @@ internal sealed class ApiEnventHandler(State state)
 				if (field != value)
 				{
 					field = value;
-					Log.Print($"Match.Mode = {Log.Yellow}{field}");
+					Log.Write(Log.Level.Debug, $"Match.Mode = {Log.Yellow}{field}");
 				}
 			}
 		}
@@ -37,7 +37,7 @@ internal sealed class ApiEnventHandler(State state)
 				if (field != value)
 				{
 					field = value;
-					Log.Write($"Match.WinnerSoFar = {field}");
+					Log.Write(Log.Level.Debug, $"Match.WinnerSoFar = {field}");
 				}
 			}
 		}
@@ -49,7 +49,7 @@ internal sealed class ApiEnventHandler(State state)
 				if (field != value)
 				{
 					field = value;
-					Log.Print($"Match.Status = {Log.Yellow}{field}");
+					Log.Write(Log.Level.Info, $"Match.Status = {Log.Yellow}{field}");
 				}
 			}
 		}
@@ -57,17 +57,17 @@ internal sealed class ApiEnventHandler(State state)
 		public Match(string guid)
 		{
 			ArgumentNullException.ThrowIfNull(guid);
-			Log.Write("---");
-			Log.Print("Match created");
+			Log.Write(Log.Level.Debug, "---");
+			Log.Write(Log.Level.Info, "Match created");
 			Guid = guid;
-			Log.Write($"Match.Guid = {guid}");
+			Log.Write(Log.Level.Debug, $"Match.Guid = {guid}");
 			Mode = GameMode.Other;
-			Log.Write($"Match.Mode = {Mode}");
+			Log.Write(Log.Level.Debug, $"Match.Mode = {Mode}");
 			WinnerSoFar = Team.None;
-			Log.Write($"Match.WinnerSoFar = {WinnerSoFar}");
+			Log.Write(Log.Level.Debug, $"Match.WinnerSoFar = {WinnerSoFar}");
 			Status = MatchStatus.Pending;
-			Log.Write($"Match.Status = {Status}");
-			Log.Write("---");
+			Log.Write(Log.Level.Debug, $"Match.Status = {Status}");
+			Log.Write(Log.Level.Debug, "---");
 		}
 	}
 
@@ -81,7 +81,7 @@ internal sealed class ApiEnventHandler(State state)
 				if (field != value)
 				{
 					field = value;
-					Log.Print($"Player.Name = {Log.Yellow}{field}");
+					Log.Write(Log.Level.Info, $"Player.Name = {Log.Yellow}{field}");
 				}
 			}
 		}
@@ -93,7 +93,7 @@ internal sealed class ApiEnventHandler(State state)
 				if (field != value)
 				{
 					field = value;
-					Log.Write($"Player.Id = {field}");
+					Log.Write(Log.Level.Debug, $"Player.Id = {field}");
 				}
 			}
 		}
@@ -105,7 +105,7 @@ internal sealed class ApiEnventHandler(State state)
 				if (field != value)
 				{
 					field = value;
-					Log.Write($"Player.Shortcut = {field}");
+					Log.Write(Log.Level.Debug, $"Player.Shortcut = {field}");
 				}
 			}
 		}
@@ -117,31 +117,31 @@ internal sealed class ApiEnventHandler(State state)
 				if (field != value)
 				{
 					field = value;
-					Log.Print($"Player.Team = {Log.Yellow}{field}");
+					Log.Write(Log.Level.Info, $"Player.Team = {Log.Yellow}{field}");
 				}
 			}
 		}
 
 		public Player(string name, string id)
 		{
-			Log.Write("---");
-			Log.Write("Player created");
+			Log.Write(Log.Level.Debug, "---");
+			Log.Write(Log.Level.Debug, "Player created");
 			Name = name;
 			Id = id;
 			Shortcut = null;
-			Log.Write($"Player.Shortcut = {Shortcut}");
+			Log.Write(Log.Level.Debug, $"Player.Shortcut = {Shortcut}");
 			Team = null;
-			Log.Write($"Player.Team = {Team}");
-			Log.Write("---");
+			Log.Write(Log.Level.Debug, $"Player.Team = {Team}");
+			Log.Write(Log.Level.Debug, "---");
 		}
 
 		public void Reset()
 		{
-			Log.Write("---");
-			Log.Write("Player.Reset()");
+			Log.Write(Log.Level.Debug, "---");
+			Log.Write(Log.Level.Debug, "Player.Reset()");
 			Shortcut = null;
 			Team = null;
-			Log.Write("---");
+			Log.Write(Log.Level.Debug, "---");
 		}
 	}
 
@@ -160,7 +160,7 @@ internal sealed class ApiEnventHandler(State state)
 			if (field != value)
 			{
 				field = value;
-				Log.Write($"InReplay = {field}");
+				Log.Write(Log.Level.Debug, $"InReplay = {field}");
 			}
 		}
 	} = false;
@@ -172,8 +172,8 @@ internal sealed class ApiEnventHandler(State state)
 			if (field != value)
 			{
 				field = value;
-				Log.Write("#############################################################");
-				Log.Write($"Handling event {field}");
+				Log.Write(Log.Level.Debug, "#############################################################");
+				Log.Write(Log.Level.Debug, $"Handling event {field}");
 			}
 		}
 	}
@@ -232,15 +232,6 @@ internal sealed class ApiEnventHandler(State state)
 
 	private void NewMatch(string matchGuid)
 	{
-		if (string.IsNullOrWhiteSpace(matchGuid))
-		{
-			if (matchGuid == null)
-				Log.PrintRed($"Training Guid = [null]");
-			else if (string.IsNullOrEmpty(matchGuid))
-				Log.PrintRed($"Training Guid = \"\"");
-			// During training, events are sent with MatchGuid == "" => skip it
-			return;
-		}
 		if (CurrentMatch.Guid != matchGuid)
 		{
 			StopCurrentMatch();
@@ -331,7 +322,7 @@ internal sealed class ApiEnventHandler(State state)
 			ApiPlayer? apiPlayer = GetPlayerFromShortcut(payload.Players, payload.Game.Target.Shortcut);
 			if (apiPlayer == null)
 			{
-				Log.Print($"{Log.Red}Player [{payload.Game.Target?.Shortcut}] not found");
+				Log.Write(Log.Level.Warning, $"Player [{payload.Game.Target?.Shortcut}] not found");
 				return;
 			}
 
@@ -359,7 +350,7 @@ internal sealed class ApiEnventHandler(State state)
 		double startSpeed = Math.Round(payload.BallLastTouch.Speed);
 		double goalSpeed = Math.Round(payload.GoalSpeed);
 
-		Log.Print($"Goal scored: {startSpeed} km/h -> {goalSpeed} km/h");
+		Log.Write(Log.Level.Info, $"Goal scored: {startSpeed} km/h -> {goalSpeed} km/h");
 	}
 
 	private void StopCurrentMatch()
@@ -370,13 +361,13 @@ internal sealed class ApiEnventHandler(State state)
 		}
 		else if (CurrentMatch.Status == MatchStatus.Pending)
 		{
-			Log.Print("Match not started ignored");
+			Log.Write(Log.Level.Info, "Match not started ignored");
 		}
 		else if (CurrentMatch.Status == MatchStatus.InProgress)
 		{
 			if (CurrentPlayer?.Team == null)
 			{
-				Log.Print($"{Log.Red}Unable to compute match result because player or player's team is null");
+				Log.Write(Log.Level.Warning, "Unable to compute match result because player or player's team is null");
 			}
 			else
 			{
@@ -396,16 +387,16 @@ internal sealed class ApiEnventHandler(State state)
 				if (CurrentPlayer.Team == CurrentMatch.WinnerSoFar)
 				{
 					State.PlusWin(CurrentMatch.Mode);
-					Log.Print($"{Log.Green}=> [{Mode}] WIN!");
+					Log.Write(Log.Level.Info, $"{Log.Green}=> [{Mode}] WIN!");
 				}
 				else
 				{
 					State.PlusLoss(CurrentMatch.Mode);
-					Log.Print($"{Log.Red}=> [{Mode}] LOSS");
+					Log.Write(Log.Level.Info, $"{Log.Red}=> [{Mode}] LOSS");
 				}
-				Log.Print($"{Log.Blue}-------------");
-				Log.Print($"{Log.Blue} {State.CurrentTracker.Win} | {State.CurrentTracker.Loss} | {State.CurrentTracker.Streak}");
-				Log.Print($"{Log.Blue}-------------");
+				Log.Write(Log.Level.Info, $"{Log.Blue}-------------");
+				Log.Write(Log.Level.Info, $"{Log.Blue} {State.CurrentTracker.Win} | {State.CurrentTracker.Loss} | {State.CurrentTracker.Streak}");
+				Log.Write(Log.Level.Info, $"{Log.Blue}-------------");
 			}
 		}
 		CurrentMatch.Status = MatchStatus.Ended;

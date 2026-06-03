@@ -20,7 +20,7 @@ public partial class App : Application
 		}
 		catch (Exception exception)
 		{
-			Log.PrintRed($"❌ ERROR: {exception.Message}");
+			Log.Write(Log.Level.Error, $"❌ ERROR: {exception.Message}");
 			Shutdown(_exitFailure);
 		}
 	}

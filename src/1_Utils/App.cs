@@ -3,45 +3,45 @@ namespace GuillaumeAst.Utils;
 public static class App
 {
     public const string AppName = "RlTracker";
-    public static readonly string AppDir = GetAppDir();
+    public static readonly string Directory = GetDirectory();
 
-    private static string GetAppDir()
+    private static string GetDirectory()
     {
-		string? appDir = null;
+		string? appDirectory = null;
 		try
 		{
-			appDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+			appDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 		}
 		catch (PlatformNotSupportedException)
 		{
 			// Fallback available
 		}
-		if (string.IsNullOrWhiteSpace(appDir))
+		if (string.IsNullOrWhiteSpace(appDirectory))
 		{
 			try
 			{
-				appDir = Environment.GetEnvironmentVariable("HOME");
+				appDirectory = Environment.GetEnvironmentVariable("HOME");
 			}
 			catch (System.Security.SecurityException)
 			{
 				// Fallback available
 			}
 		}
-		if (string.IsNullOrWhiteSpace(appDir))
+		if (string.IsNullOrWhiteSpace(appDirectory))
 		{
 			try
 			{
-				appDir = Environment.GetEnvironmentVariable("USERPROFILE");
+				appDirectory = Environment.GetEnvironmentVariable("USERPROFILE");
 			}
 			catch (System.Security.SecurityException)
 			{
 				// Fallback available
 			}
 		}
-		if (string.IsNullOrWhiteSpace(appDir))
+		if (string.IsNullOrWhiteSpace(appDirectory))
 		{
 			return Path.Combine(AppContext.BaseDirectory, AppName);
 		}
-		return Path.Combine(appDir, AppName);
+		return Path.Combine(appDirectory, AppName);
 	}
 }

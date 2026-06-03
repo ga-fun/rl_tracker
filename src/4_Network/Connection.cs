@@ -166,14 +166,14 @@ public sealed class Connection : Notifier
 		if (Status == ConnectionStatus.Connected)
 		{
 			Status = ConnectionStatus.Reconnecting;
-			Log.PrintRed($"Connection lost: {exception.GetType().Name}: {exception.Message}");
+			Log.Write(Log.Level.Warning, $"Connection lost: {exception.GetType().Name}: {exception.Message}");
 			TryEvent(Reconnecting, exception);
 		}
 		else if (_lastExceptionMessage == null || _lastExceptionMessage != exception.Message)
 		{
 			_lastExceptionMessage = exception.Message;
-			Log.PrintRed($"Connection failed: {exception.GetType().Name}: {exception.Message}");
-			Log.PrintYellow($"Retrying every {ConnectionRetryDelay} ms...");
+			Log.Write(Log.Level.Warning, $"Connection failed: {exception.GetType().Name}: {exception.Message}");
+			Log.Write(Log.Level.Info, $"Retrying every {ConnectionRetryDelay} ms...");
 		}
 		state.ShouldWait = true;
 	}
