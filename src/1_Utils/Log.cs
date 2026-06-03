@@ -20,19 +20,21 @@ public static class Log
 	private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 	private static readonly Lock FileGate = new();
 	private static readonly string Dir = Path.Combine(App.Directory, "logs");
-	private static readonly string FileName = $"{DateTime.Now:dd-MM-yy-HH:mm:ss}{FileExtension}";
+	private static readonly string FileName = $"{DateTime.Now:dd-MM-yy-HH-mm-ss}{FileExtension}";
 	public static Level LevelMin { get; set; } = Level.Info;
 	private static bool Enabled { get; set; } = false;
 	public static readonly string LogFile = Path.Combine(Dir, FileName);
 
-	public static void Init(Level levelMin = Level.Info)
+	// TODO: make default level to Info for release
+	public static void Init(Level levelMin = Level.Debug)
 	{
+		Enabled = true;
 		LevelMin = levelMin;
 		try
 		{
 			Directory.CreateDirectory(Dir);
 			Cleanup();
-			Enabled = true;
+			Write(Level.Debug, $"Log init succeed (Enabled = {Enabled} | LevelMin = {LevelMin})");
 		}
 		catch (Exception exception) when (exception
 			is IOException
@@ -41,6 +43,7 @@ public static class Log
   			or DirectoryNotFoundException
 			or NotSupportedException)
 		{
+			Write(Level.Error, $"Log init failed: {exception.Message}");
 			Enabled = false;
 		}
 	}
@@ -55,7 +58,7 @@ public static class Log
 	{
 		string dump;
 	
-		if (Enabled == false)
+		if (ShouldWrite(level) == false)
 		{
 			return;
 		}
@@ -78,11 +81,15 @@ public static class Log
 		[CallerFilePath] string file = "",
 		[CallerLineNumber] int line = 0)
 	{
-		if (Enabled == false)
+		if (ShouldWrite(level))
 		{
-			return;
+			WriteInternal(level, message, caller, file, line);
 		}
-		WriteInternal(level, message, caller, file, line);
+	}
+
+	private static bool ShouldWrite(Level level)
+	{
+		return Enabled == true && level >= LevelMin;
 	}
 
 	private static void WriteInternal(
@@ -92,11 +99,6 @@ public static class Log
 		string file,
 		int line)
 	{
-		if (Enabled == false)
-		{
-			return;
-		}
-
 		string fileName = Path.GetFileName(file);
 		string time = $"{DateTime.Now:HH:mm:ss.fff}";
 		// TODO (START): only for console debugging
@@ -146,9 +148,7 @@ public static class Log
 				.Select(path => new FileInfo(path))
 				.OrderByDescending(file => file.LastWriteTimeUtc)];
 			
-			while (files.Count > MaxFileCount
-				|| files.Sum(file => file.Length) > MaxFileSizeInMo
-				|| files[^1].LastWriteTimeUtc < DateTime.UtcNow.AddDays(-(double)MaxFileAgeInDays))
+			while (ShouldDeleteOldestFile(files))
 			{
 				files[^1].Delete();
 				files.RemoveAt(files.Count - 1);
@@ -164,6 +164,17 @@ public static class Log
 		{
 			// Best effort
 		}
+	}
+
+	private static bool ShouldDeleteOldestFile(List<FileInfo> files)
+	{
+		if (files.Count == 0)
+		{
+			return false;
+		}
+		return files.Count > MaxFileCount
+			|| files.Sum(file => file.Length) > MaxFileSizeInMo * 1024 * 1024
+			|| files[^1].LastWriteTimeUtc < DateTime.UtcNow.AddDays(-(double)MaxFileAgeInDays);
 	}
 
 	// TODO (START): only for console debugging

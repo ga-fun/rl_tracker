@@ -1,6 +1,6 @@
 # TODO
 
-- `Network.Client` => Handle `TCP Frames` to avoid parsing errors
+- `ApiMessageFramer` => clean code
 - `RlNotFound` + `RlNeedRestart` => move to `RocketLeague.Config`
 - Implement UI
 

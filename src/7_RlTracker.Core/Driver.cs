@@ -4,6 +4,7 @@ using GuillaumeAst.Utils;
 using GuillaumeAst.Network;
 using GuillaumeAst.RlTracker.Settings;
 using GuillaumeAst.RocketLeague;
+using statsApiMessageFramer = GuillaumeAst.RocketLeague.StatsApi.ApiMessageFramer;
 using StatsApiEvent = GuillaumeAst.RocketLeague.StatsApi.Event;
 
 using System.Text;	// TODO: tmp debug
@@ -46,8 +47,8 @@ public sealed partial class Driver : Notifier
 
 	public static Driver Instance { get; } = new();
 	public static readonly State State = new();
-	// private static readonly ApiMessageFramer ApiMessageFramer = new();
-	// private static readonly ApiEnventHandler ApiEnventHandler = new(State);
+	private static readonly statsApiMessageFramer ApiMessageFramer = new();
+	private static readonly ApiEnventHandler ApiEnventHandler = new(State);
 	private static readonly SemaphoreSlim _gate = new(1, 1);
 	public Connection Connection;
 	public Config Config
@@ -65,6 +66,7 @@ public sealed partial class Driver : Notifier
 	
 	private Driver()
 	{
+		Log.Init();
 		Log.Write(Log.Level.Info, $"Logs will be stored in: {Log.Blue}\"{Log.LogFile}\"");
 		Config = Config.Load();
 		RlNotFound = RlIsNotFound(Config);
@@ -176,16 +178,13 @@ public sealed partial class Driver : Notifier
 	{
 		try
 		{
-			string message = Encoding.UTF8.GetString(bytes);
-
-			Log.Write(Log.Level.Debug, $"TCP bytes received: {bytes.Length}");
-			Log.Write(Log.Level.Debug, $"TCP chunk: [{message.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\0", "\\0")}]");
-			// TODO:
-			// foreach (string message in ApiMessageFramer.GetApiMessages(bytes))
-			// {
-			// 	StatsApiEvent apiEvent = new(message);
-			// 	ApiEnventHandler.HandleEvent(apiEvent);
-			// }
+			// Log.Write(Log.Level.Debug, $"TCP bytes received: {bytes.Length}");
+			// Log.Write(Log.Level.Debug, $"TCP chunk: [{message.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\0", "\\0")}]");
+			foreach (string message in ApiMessageFramer.GetApiMessages(bytes))
+			{
+				StatsApiEvent apiEvent = new(message);
+				ApiEnventHandler.HandleEvent(apiEvent);
+			}
 		}
 		catch (Exception exception) when (exception
 			is FormatException
