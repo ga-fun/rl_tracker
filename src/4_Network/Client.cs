@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using GuillaumeAst.Utils;
 
 namespace GuillaumeAst.Network;
+
+// TODO: TCP is a byte stream, so one read can contain partial/multiple JSON events.
 
 internal sealed class Client(int port) : IDisposable
 {

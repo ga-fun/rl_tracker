@@ -57,12 +57,12 @@ public sealed partial class Driver : Notifier
 	}
 	public static Driver Instance { get; } = new();
 	
-	private static readonly MessageHandler MessageHandler = new(State);
+	private static readonly ApiEnventHandler ApiEnventHandler = new(State);
 	private static readonly SemaphoreSlim _gate = new(1, 1);
 
 	private Driver()
 	{
-		Log.Print($"Logs will be stored in: {Log.Blue}\"{Log.LogFile}\"");
+		Log.Write(Log.Level.Info, $"Logs will be stored in: {Log.Blue}\"{Log.LogFile}\"");
 		Connection.MessageReceived += OnMessage;
 		Connection.PropertyChanged += OnConnectionChanged;
 		Config = Config.Load();
@@ -114,7 +114,7 @@ public sealed partial class Driver : Notifier
 
 	private async Task UnsafeUpdateConfigAsync(Config newConfig)
 	{
-		Log.Print("Updating core config...");
+		Log.Write(Log.Level.Info, $"{Log.Yellow}Updating core config...");
 
 		RlNotFound = RlIsNotFound(newConfig);
 		if (RlNotFound)
@@ -137,7 +137,7 @@ public sealed partial class Driver : Notifier
 		}
 		Config = newConfig;
 		Config.Save();
-		Log.PrintGreen("Core config updated");
+		Log.Write(Log.Level.Info, $"{Log.Green}Core config updated");
 		await UnsafeStart();
 	}
 
@@ -151,8 +151,8 @@ public sealed partial class Driver : Notifier
 
 	private static Connection.ExceptionAction OnException(Exception exception)
 	{
-		Log.PrintRed($"Connection exception: {exception.GetType().Name}: {exception.Message}");
-		// TODO
+		Log.Write(Log.Level.Error, $"Connection exception: {exception.GetType().Name}: {exception.Message}");
+		// TODO: Stop connection on some fatal errors?
 		return Connection.ExceptionAction.Continue;
 	}
 
@@ -161,13 +161,13 @@ public sealed partial class Driver : Notifier
 		try
 		{
 			StatsApiEvent apiEvent = new(message);
-			MessageHandler.HandleEvent(apiEvent);
+			ApiEnventHandler.HandleEvent(apiEvent);
 		}
 		catch (Exception exception) when (exception
 			is FormatException
 			or NotSupportedException)
 		{
-			Log.PrintRed($"Message parsing error: {exception.GetType().Name}: {exception.Message}");
+			Log.Write(Log.Level.Error, $"Message parsing error: {exception.GetType().Name}: {exception.Message}");
 		}
 	}
 
@@ -181,16 +181,16 @@ public sealed partial class Driver : Notifier
 
 		if (status == Connection.ConnectionStatus.Connected)
 		{
-			Log.PrintGreen($"{status}");
+			Log.Write(Log.Level.Info, $"{Log.Green}{status}");
 		}
 		else if (status == Connection.ConnectionStatus.Disconnected)
 		{
-			Log.PrintRed($"{status}");
+			Log.Write(Log.Level.Info, $"{Log.Red}{status}");
 			OnDisconnect();
 		}
 		else
 		{
-			Log.PrintYellow($"{status}...");
+			Log.Write(Log.Level.Info, $"{Log.Yellow}{status}...");
 		}
 	}
 

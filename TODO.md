@@ -1,121 +1,108 @@
 # TODO
 
-- ⚠️ **Nouveau double Autodetect des install dir !!** ⚠️
+- `Network.Client` => Handle `TCP Frames` to avoid parsing errors
 - `RlNotFound` + `RlNeedRestart` => move to `RocketLeague.Config`
-- Remove useless `?` from payloads!
-- `Log.Write(string message)` => write dans un file log
-- `Network.Client` => Handle `TCP Frames` ?
+- Implement UI
 
 ---
 
-# NORME
+# Logs management
 
-- Namespaces `GuillaumeAst.`:
-```cs
-// Au lieu de
-namespace MyNameSpace;
-// Plutôt faire
-namespace GuillaumeAst.MyNameSpace;
-```
+- Add logs levels:
+	- `Debug`
+	- `Info`
+	- `Warning`
+	- `Error`
+- Add log mode (can be choosen in `Config`) (internal name / UI name):
+	- `Debug` / `Debug` (write all logs)
+	- `Info` / `Verbose` (do NOT write `Debug` logs)
+	- `Warning` / `Quiet` (ONLY write `Warning` and `Error` logs)
+	- `Error` / `ErrorOnly` (ONLY write `Error` logs)
+- At startup, auto-delete the oldest logfile while any of these rules is false (can be choosen in `Config`) :
+	- max log files count = 10
+	- max log size = 100 Mo
+	- max log date = 7 days
 
-- Ne pas `throw` si le call system le fait déjà:
-```cs
-// Au lieu de
-if (!File.Exists(file))
-{
-	throw new FileNotFoundException(...);
-}
-string content = File.ReadAllText(file);
-// Plutôt faire
-string content = File.ReadAllText(file);
-```
+---
 
-- Accolades sur les `if`, les boucles etc:
-```cs
-// Au lieu de 
-if (true)
-	DoThis();
-// Plutôt faire
-if (true)
-{
-	DoThis();
-}
-```
+# FINAL
 
-- Ne **JAMAIS** faire de catch **global**:
-```cs
-// Ne pas faire
-try
-{...}
-catch
-{...}
-// Ni
-try
-{...}
-catch (Exception exception)
-{...}
-```
+- `RlTracker.Ui.csproj` change `<OutputType>Exe</OutputType>` to `<OutputType>WinExe</OutputType>`
 
 ---
 
 # UI
 
-## Components
+## PREFIXES
 
-- `ConnectionStatus`:
-	- [OUT] string `Status` (red = disconnected / yellow = connecting / green = connected)
-- `MainTracker`:
-	- [OUT] uint `WinCount`
-	- [OUT] uint `LossCount`
-	- [OUT] int `StreakCount`
-- [BUTTON] `SettingsButton`
-- `UiSettings`:
-	- [IN] string `WinPrefix`
-	- [IN] string `LossPrefix`
-	- [IN] string `WinStreakPrefix`
-	- [IN] string `LossStreakPrefix`
-- `InstallSettings`:
-	- [IN] string `EpicRlInstallDir`
-	- [OUT] string `EpicStatus`
-	- [IN] string `SteamRlInstallDir`
-	- [OUT] string `SteamStatus`
-- `ClientSettings`:
-	- [IN] int `Port`
-	- [IN] double `PacketSendRate`
-- `TrackerCount`:
-	- [BUTTON] `Minus`
-	- [OUT] int `Count`
-	- [BUTTON] `Plus`
-- `TrackerSettings`:
-	- [CHECKBOX] `IsActive`
-	- [OUT] string `GameMode`
-	- `TrackerCount` `Win`
-	- `TrackerCount` `Lose`
-	- [OUT] int `Streak`
-	- [BUTTON] `Reset`
-- `LogsDisplay`
-	- [OUT] string `Logs`
+- [ROW] = grouping horizontal un peu comme en flexbox
+- [COL] = grouping vertical un peu comme en flexbox
+- [IN] = affiche quelquechose qui peut être modifié par une saisie de l'utilisateur
+- [OUT] = affiche quelquechose mais le contenu n'est pas éditable par l'utilisateur
+- [BUTTON] = affiche un bouton cliquable
 
+## COMPONENTS
 
-## Windows
+- [COL] `InstallWindow`:
+	- [OUT] string `Title`
+	- [COL] string `EpicSection`:
+		- [OUT] string `EpicTitle`
+		- [ROW] `EpicRow`:
+			- [IN] string epicInput
+			- [BUTTON] `EpicSearchButton`
+			- [BUTTON] `EpicBrowseButton`
+		- [OUT] string `EpicStatus`
+	- [COL] string `SteamSection`:
+		- [OUT] string `SteamTitle`
+		- [ROW] `SteamRow`:
+			- [IN] string steamInput
+			- [BUTTON] `SteamSearchButton`
+			- [BUTTON] `SteamBrowseButton`
+		- [OUT] string `SteamStatus`
 
-- `MinimalWindow`:
-	- `MainTracker`
-	- `SettingsButton`
-- `ConfigWindow`:
-	- `UiSettings`
-	- `InstallSettings`
-	- `ClientSettings`
+- [COL] `MainTracker`:
+	- [ROW] `TrackerContent`:
+		- [OUT] string `Content` (WinPrefix + WinCount + separator + LossPrefix + LossCount + separator + StreakPrefix + StreakCount + separator)
+		- [BUTTON] `SettingsButton`
+	- [ROW] `TrackerStatus`:
+		- [OUT] string `Status`
+
+- [COL] `SettingsClosed`:
+	- [ROW] `ConfigSection`:
+		- [OUT] string `Title`
+		- [OUT] string `EpicStatus`
+		- [OUT] string `SteamStatus`
+		- [BUTTON] `OpenButton`
+	- [COL] `ConfigExpandableSection`:
+		- TODO...
+	- [ROW] `PlayerSection`:
+		- [OUT] string `Title`
+		- [OUT] string `PlayerName`
+		- [BUTTON] `OpenButton`
+	- [COL] `PlayerExpandableSection`:
+		- TODO...
+	- [ROW] `TrackerSection`:
+		- [OUT] string `Title`
+		- [OUT] string `Content`
+		- [BUTTON] `OpenButton`
+	- [COL] `TrackerExpandableSection`:
+		- TODO...
+	- [ROW] `LogsSection`:
+		- [OUT] string `Title`
+		- [OUT] string `ConnectionStatus`
+		- [BUTTON] `OpenButton`
+	- [COL] `LogExpandableSection`:
+		- TODO...
 
 ## Flow
 
-1. If `RlNotFound == true` => only show `ConfigWindow`
-2. Else => show `MinimalWindow`
-3. When `SettingsButton` is clicked: show `SettingsWindow`
+1. If `RlNotFound == true` => only show `InstallWindow`
+2. Else => show `MainTracker`
+3. When `MainTracker.SettingsButton` is clicked: show `SettingsClosed`
+4. When `SettingsClosed.*.OpenButton` is clicked: expand corresponding section
 
-- Catch + error messages:
+- 🤔 `ErrorMessage` should be at the bottom of the main window to always display error messages:
 	- `⚠️ Config not found: initializing default config`
 	- `⚠️ Unable to save config: {exception.message}`
-	- `⚠️ Unable to find Rocket League (Epic version)`
-	- `⚠️ Unable to find Rocket League (Steam version)`
 	- `⚠️ Config updated: please start or restart Rocket League`
+	- ...

@@ -1,5 +1,6 @@
 namespace GuillaumeAst.RocketLeague.StatsApi;
 
-public interface IPayload
+public abstract class Payload(string matchGuid)
 {
+    public string MatchGuid { get; } = matchGuid;
 }

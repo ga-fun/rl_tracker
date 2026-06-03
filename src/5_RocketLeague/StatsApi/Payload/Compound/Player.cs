@@ -39,30 +39,21 @@ public sealed class Player(
 	public int Touches { get; } = touches;
 	public int CarTouches { get; } = carTouches;
 	public int Demos { get; } = demos;
-
 	[JsonPropertyName("bHasCar")]
 	public bool? BHasCar { get; } = bHasCar;
-
 	public double? Speed { get; } = speed;
 	public int? Boost { get; } = boost;
-
 	[JsonPropertyName("bBoosting")]
 	public bool? BBoosting { get; } = bBoosting;
-
 	[JsonPropertyName("bOnGround")]
 	public bool? BOnGround { get; } = bOnGround;
-
 	[JsonPropertyName("bOnWall")]
 	public bool? BOnWall { get; } = bOnWall;
-
 	[JsonPropertyName("bPowersliding")]
 	public bool? BPowersliding { get; } = bPowersliding;
-
 	[JsonPropertyName("bDemolished")]
 	public bool? BDemolished { get; } = bDemolished;
-
 	[JsonPropertyName("bSupersonic")]
 	public bool? BSupersonic { get; } = bSupersonic;
-
 	public PlayerRef? Attacker { get; } = attacker;
 }

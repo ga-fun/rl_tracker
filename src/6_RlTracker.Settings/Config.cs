@@ -12,50 +12,9 @@ public sealed partial class Config : Notifier
 	[JsonConstructor]
 	private Config(){}
 	private const double ApiSendPacketRateDefault = 30;
-	private const string ConfigRelativeDir = "RlTracker";
 	private const string ConfigFileName = "settings.json";
 	private static readonly JsonSerializerOptions JsonOptions = new(){ WriteIndented = true };
-	private static readonly string ConfigFile = GetConfigFile();
-
-	private static string GetConfigFile()
-	{
-		string? configRootDir = null;
-		try
-		{
-			configRootDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-		}
-		catch (PlatformNotSupportedException)
-		{
-			// Fallback available
-		}
-		if (string.IsNullOrWhiteSpace(configRootDir))
-		{
-			try
-			{
-				configRootDir = Environment.GetEnvironmentVariable("HOME");
-			}
-			catch (System.Security.SecurityException)
-			{
-				// Fallback available
-			}
-		}
-		if (string.IsNullOrWhiteSpace(configRootDir))
-		{
-			try
-			{
-				configRootDir = Environment.GetEnvironmentVariable("USERPROFILE");
-			}
-			catch (System.Security.SecurityException)
-			{
-				// Fallback available
-			}
-		}
-		if (string.IsNullOrWhiteSpace(configRootDir))
-		{
-			return Path.Combine(AppContext.BaseDirectory, ConfigFileName);
-		}
-		return Path.Combine(configRootDir, ConfigRelativeDir, ConfigFileName);
-	}
+	private static readonly string ConfigFile = Path.Combine(App.Directory, ConfigFileName);
 
 	public ConfigUI ConfigUI { get; init; } = new();
 	public StatsApiConfig StatsApiConfig { get; init; } = new(null, ApiSendPacketRateDefault);
@@ -67,12 +26,12 @@ public sealed partial class Config : Notifier
 	public static Config Load()
 	{
 		IsLoading = true;
-		Log.PrintYellow($"Loading config from: {Log.Blue}\"{ConfigFile}\"{Log.Yellow}");
+		Log.Write(Log.Level.Info, $"Loading config from: {Log.Blue}\"{ConfigFile}\"{Log.Yellow}");
 		try
 		{
 			if (!File.Exists(ConfigFile))
 			{
-				Log.PrintRed($"Config file not found");
+				Log.Write(Log.Level.Warning, $"Config file not found");
 				return CreateDefault();
 			}
 			string json = File.ReadAllText(ConfigFile);
@@ -88,10 +47,10 @@ public sealed partial class Config : Notifier
 				{
 					configMaybe.SteamInstall.AutoDetectInstallDir();
 				}
-				Log.Dump(configMaybe, $"{Log.Green}Config loaded:");
+				Log.Dump(configMaybe, Log.Level.Debug, $"{Log.Green}Config loaded:{Log.Reset}");
 				return configMaybe;
 			}
-			Log.PrintRed("Unable to parse config");
+			Log.Write(Log.Level.Error, "Unable to parse config");
 			return CreateDefault();
 		}
 		catch (Exception exception) when (exception
@@ -100,7 +59,7 @@ public sealed partial class Config : Notifier
 			or System.Security.SecurityException
 			or JsonException)
 		{
-			Log.PrintRed($"Config loading failed: {exception.Message}");
+			Log.Write(Log.Level.Error, $"Config loading failed: {exception.Message}");
 			return CreateDefault();
 		}
 		finally
@@ -115,18 +74,18 @@ public sealed partial class Config : Notifier
 		if (EpicInstall.InstallDir != null && EpicInstall.IsValid)
 		{
 			StatsApiConfig.Apply(EpicInstall.InstallDir, ref rlNeedRestart);
-			Log.PrintGreen("Epic config applied");
+			Log.Write(Log.Level.Info, $"{Log.Green}Epic config applied");
 		}
 		if (SteamInstall.InstallDir != null && SteamInstall.IsValid)
 		{
 			StatsApiConfig.Apply(SteamInstall.InstallDir, ref rlNeedRestart);
-			Log.PrintGreen("Steam config applied");
+			Log.Write(Log.Level.Info, $"{Log.Green}Steam config applied");
 		}
 	}
 
 	public void Save()
 	{
-		Log.PrintYellow("Saving config...");
+		Log.Write(Log.Level.Info, $"{Log.Yellow}Saving config...");
 		string? directory = Path.GetDirectoryName(ConfigFile);
 
 		if (!string.IsNullOrWhiteSpace(directory))
@@ -135,12 +94,12 @@ public sealed partial class Config : Notifier
 		}
 		string json = JsonSerializer.Serialize(this, JsonOptions);
 		File.WriteAllText(ConfigFile, json);
-		Log.PrintGreen($"Config saved to: {Log.Blue}\"{ConfigFile}\"{Log.Reset}");
+		Log.Write(Log.Level.Info, $"{Log.Green}Config saved to: {Log.Blue}\"{ConfigFile}\"{Log.Reset}");
 	}
 
 	private static Config CreateDefault()
 	{
-		Log.PrintYellow("Creating default config...");
+		Log.Write(Log.Level.Info, $"{Log.Yellow}Creating default config...");
 		Config config = new();
 		config.SubscribeInstallChanges();
 		config.EpicInstall.AutoDetectInstallDir();

@@ -1,74 +1,64 @@
-using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace GuillaumeAst.Utils;
 
 public static class Log
-{
-	public static readonly string LogFile = GetLogFile();
-	public const string Green = "\u001b[32m";
-	public const string Blue = "\u001b[34m";
-	public const string Red = "\u001b[31m";
-	public const string Yellow = "\u001b[33m";
-	public const string Reset = "\u001b[0m";
+{	
+	public enum Level
+	{
+		Debug,
+		Info,
+		Warning,
+		Error
+	}
 
+	private const string FileExtension = ".log";
+	private const uint MaxFileCount = 10;
+	private const uint MaxFileSizeInMo = 100;
+	private const uint MaxFileAgeInDays = 7;
 	private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 	private static readonly Lock FileGate = new();
-	private const string LogDirName = "logs";
-	private const string LogFileName = "rlTracker.log";
+	private static readonly string Dir = Path.Combine(App.Directory, "logs");
+	private static readonly string FileName = $"{DateTime.Now:dd-MM-yy-HH:mm:ss}{FileExtension}";
+	public static Level LevelMin { get; set; } = Level.Info;
+	private static bool Enabled { get; set; } = false;
+	public static readonly string LogFile = Path.Combine(Dir, FileName);
 
-	private static string GetLogFile()
+	public static void Init(Level levelMin = Level.Info)
 	{
-		string? LogRootDir = null;
+		LevelMin = levelMin;
 		try
 		{
-			LogRootDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+			Directory.CreateDirectory(Dir);
+			Cleanup();
+			Enabled = true;
 		}
-		catch (PlatformNotSupportedException)
+		catch (Exception exception) when (exception
+			is IOException
+			or UnauthorizedAccessException
+			or PathTooLongException
+  			or DirectoryNotFoundException
+			or NotSupportedException)
 		{
-			// Fallback available
+			Enabled = false;
 		}
-		if (string.IsNullOrWhiteSpace(LogRootDir))
-		{
-			try
-			{
-				LogRootDir = Environment.GetEnvironmentVariable("HOME");
-			}
-			catch (System.Security.SecurityException)
-			{
-				// Fallback available
-			}
-		}
-		if (string.IsNullOrWhiteSpace(LogRootDir))
-		{
-			try
-			{
-				LogRootDir = Environment.GetEnvironmentVariable("USERPROFILE");
-			}
-			catch (System.Security.SecurityException)
-			{
-				// Fallback available
-			}
-		}
-		if (string.IsNullOrWhiteSpace(LogRootDir))
-		{
-			return Path.Combine(AppContext.BaseDirectory, LogFileName);
-		}
-		return Path.Combine(LogRootDir, LogDirName, LogFileName);
 	}
 
 	public static void Dump<T>(
 		T value,
+		Level level,
 		string? message = null,
 		[CallerMemberName] string caller = "",
 		[CallerFilePath] string file = "",
 		[CallerLineNumber] int line = 0)
 	{
-		string label = message ?? "Dump:";
 		string dump;
 	
-		PrintInternal(caller, file, line, label);
+		if (Enabled == false)
+		{
+			return;
+		}
 		try
 		{
 			dump = JsonSerializer.Serialize(value, JsonOptions);
@@ -77,98 +67,117 @@ public static class Log
 		{
 			dump = $"Exception while serializing: {exception.Message}";
 		}
-		Console.WriteLine(dump);
+		dump = message ?? "Dump:" + "\n" + dump;
+		WriteInternal(level, dump, caller, file, line);
 	}
 
 	public static void Write(
+		Level level,
 		string message,
 		[CallerMemberName] string caller = "",
 		[CallerFilePath] string file = "",
 		[CallerLineNumber] int line = 0)
 	{
-		WriteInternal(caller, file, line, message);
+		if (Enabled == false)
+		{
+			return;
+		}
+		WriteInternal(level, message, caller, file, line);
 	}
 
-	public static void Print(
+	private static void WriteInternal(
+		Level level,
 		string message,
-		[CallerMemberName] string caller = "",
-		[CallerFilePath] string file = "",
-		[CallerLineNumber] int line = 0)
+		string caller,
+		string file,
+		int line)
 	{
-		PrintInternal(caller, file, line, message);
-	}
+		if (Enabled == false)
+		{
+			return;
+		}
 
-	public static void PrintGreen(
-		string message,
-		[CallerMemberName] string caller = "",
-		[CallerFilePath] string file = "",
-		[CallerLineNumber] int line = 0)
-	{
-		PrintInternal(caller, file, line, Green + message);
-	}
-
-	public static void PrintBlue(
-		string message,
-		[CallerMemberName] string caller = "",
-		[CallerFilePath] string file = "",
-		[CallerLineNumber] int line = 0)
-	{
-		PrintInternal(caller, file, line, Blue + message);
-	}
-
-	public static void PrintRed(
-		string message,
-		[CallerMemberName] string caller = "",
-		[CallerFilePath] string file = "",
-		[CallerLineNumber] int line = 0)
-	{
-		PrintInternal(caller, file, line, Red + message);
-	}
-
-	public static void PrintYellow(
-		string message,
-		[CallerMemberName] string caller = "",
-		[CallerFilePath] string file = "",
-		[CallerLineNumber] int line = 0)
-	{
-		PrintInternal(caller, file, line, Yellow + message);
-	}
-
-	private static void PrintInternal(string caller, string file, int line, string message)
-	{
 		string fileName = Path.GetFileName(file);
-		string time = DateTime.Now.ToString("HH:mm:ss.fff");
-		Console.WriteLine($"[{time} {fileName}:{line}:{caller}] {message}{Reset}");
-		WriteInternal(caller, file, line, message);
-	}
-
-	private static void WriteInternal(string caller, string file, int line, string message)
-	{
-		string fileName = Path.GetFileName(file);
-		string time = DateTime.Now.ToString("HH:mm:ss.fff");
-		string log = RemoveColors($"[{time} {fileName}:{line}:{caller}] {message}");
-
+		string time = $"{DateTime.Now:HH:mm:ss.fff}";
+		// TODO (START): only for console debugging
+		string color = Reset;
+		if (level == Level.Warning)
+		{
+			color = Yellow;
+		}
+		else if (level == Level.Error)
+		{
+			color = Red;
+		}
+		// TODO (STOP): only for console debugging
+		string fmessage = $"[{color}{level}{Reset} | {time} {fileName}:{line}:{caller}] {color}{message}{Reset}";
+		string log = RemoveColors(fmessage);	// TODO: only for console debugging
 		try
 		{
 			lock (FileGate)
 			{
-				string? directory = Path.GetDirectoryName(LogFile);
-
-				if (!string.IsNullOrWhiteSpace(directory))
+				// TODO (START): only for console debugging
+				if (level != Level.Debug)
 				{
-					Directory.CreateDirectory(directory);
+					PrintInternal(fmessage + Reset, caller, file, line);
 				}
+				// TODO (STOP): only for console debugging
 				File.AppendAllText(LogFile, log + Environment.NewLine);
 			}
 		}
 		catch (Exception exception) when (exception
-			is IOException
+			is PathTooLongException
+  			or DirectoryNotFoundException
+			or IOException
 			or UnauthorizedAccessException
 			or NotSupportedException
 			or System.Security.SecurityException)
 		{
-			// Classic IO Exceptions: best effort
+			Enabled = false;
 		}
+	}
+
+	private static void Cleanup()
+	{
+		try
+		{
+			List<FileInfo> files = [.. Directory
+				.EnumerateFiles(Dir, $"*{FileExtension}")
+				.Select(path => new FileInfo(path))
+				.OrderByDescending(file => file.LastWriteTimeUtc)];
+			
+			while (files.Count > MaxFileCount
+				|| files.Sum(file => file.Length) > MaxFileSizeInMo
+				|| files[^1].LastWriteTimeUtc < DateTime.UtcNow.AddDays(-(double)MaxFileAgeInDays))
+			{
+				files[^1].Delete();
+				files.RemoveAt(files.Count - 1);
+			}
+		}
+		catch (Exception exception) when (exception
+  			is DirectoryNotFoundException
+			or IOException
+			or PathTooLongException
+			or System.Security.SecurityException
+			or UnauthorizedAccessException
+			or OverflowException)
+		{
+			// Best effort
+		}
+	}
+
+	// TODO (START): only for console debugging
+	public const string Green = "\u001b[32m";
+	public const string Blue = "\u001b[34m";
+	public const string Red = "\u001b[31m";
+	public const string Yellow = "\u001b[33m";
+	public const string Reset = "\u001b[0m";
+
+	private static void PrintInternal(string message, string caller, string file, int line)
+	{
+		string fileName = Path.GetFileName(file);
+		string time = DateTime.Now.ToString("HH:mm:ss.fff");
+		Console.WriteLine($"[{time} {fileName}:{line}:{caller}] {message}{Reset}");
 	}
 
 	private static string RemoveColors(string value)
@@ -180,4 +189,5 @@ public static class Log
 			.Replace(Yellow, "")
 			.Replace(Reset, "");
 	}
+	// TODO (END): only for console debugging
 }

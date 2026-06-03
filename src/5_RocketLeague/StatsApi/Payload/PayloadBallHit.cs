@@ -1,12 +1,11 @@
 namespace GuillaumeAst.RocketLeague.StatsApi;
 
 public sealed class PayloadBallHit(
-	string? matchGuid,
-	IReadOnlyList<PlayerRef>? players,
-	BallHitBall? ball
-) : IPayload
+	string matchGuid,
+	IReadOnlyList<PlayerRef> players,
+	BallHitBall ball
+) : Payload(matchGuid)
 {
-	public string? MatchGuid { get; } = matchGuid;
-	public IReadOnlyList<PlayerRef>? Players { get; } = players;
-	public BallHitBall? Ball { get; } = ball;
+	public IReadOnlyList<PlayerRef> Players { get; } = players;
+	public BallHitBall Ball { get; } = ball;
 }
