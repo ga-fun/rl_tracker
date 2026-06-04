@@ -5,7 +5,7 @@ using ApiTeam = GuillaumeAst.RocketLeague.StatsApi.Team;
 
 namespace GuillaumeAst.RlTracker.Core;
 
-internal sealed class ApiEnventHandler(State state)
+internal sealed class ApiEnventHandler(State state) : Notifier
 {
 	public sealed class Match
 	{

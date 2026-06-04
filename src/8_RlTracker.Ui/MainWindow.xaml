@@ -5,7 +5,7 @@
 	xmlns:views="clr-namespace:GuillaumeAst.RlTracker.Ui.Views"
 	Title="RlTracker"
 	SizeToContent="WidthAndHeight"
-	ResizeMode="NoResize"
+	ResizeMode="CanMinimize"
 	Background="Black">
 	<views:MainTrackerView />
 </Window>

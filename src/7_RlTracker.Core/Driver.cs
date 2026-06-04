@@ -46,11 +46,22 @@ public sealed partial class Driver : Notifier
 	/* ---------- TODO (END): move to RocketLeague Project ---------- */
 
 	public static Driver Instance { get; } = new();
-	public static readonly State State = new();
+	public static State State { get; } = new();
 	private static readonly statsApiMessageFramer ApiMessageFramer = new();
 	private static readonly ApiEnventHandler ApiEnventHandler = new(State);
 	private static readonly SemaphoreSlim _gate = new(1, 1);
-	public Connection Connection;
+	public Connection Connection
+	{
+		get;
+		private set
+		{
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
+		}
+	}
 	public Config Config
 	{
 		get;
