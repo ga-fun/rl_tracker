@@ -32,13 +32,13 @@ It shows your wins, losses and current streak while you play.
 
 ## First launch
 
-RlTracker may update your Rocket League config automatically.
+The Tracker may update your Rocket League config automatically.
 
 If the app says that Rocket League needs to restart:
 
 1. Close Rocket League.
 2. Start Rocket League again.
-3. Start or keep RlTracker open.
+3. Start or keep the Tracker open.
 
 > If Rocket League is not detected, click **Open config file** and update the Rocket League install path manually.
 
