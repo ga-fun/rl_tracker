@@ -1,5 +1,9 @@
 # TODO
 
+## README
+
+- Ajouter screenshot du tracker dans la description
+
 ## High priority
 
 - UI => error message `Rocket League not found, please edit {ConfigFile}`

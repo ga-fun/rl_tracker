@@ -256,8 +256,11 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 			{
 				CurrentPlayer = new(apiPlayer.Name, apiPlayer.PrimaryId);
 			}
-			CurrentPlayer.Shortcut = apiPlayer.Shortcut;
-			CurrentPlayer.Team = (Team)apiPlayer.TeamNum;
+			if (CurrentPlayer != null)
+			{
+				CurrentPlayer.Shortcut = apiPlayer.Shortcut;
+				CurrentPlayer.Team = (Team)apiPlayer.TeamNum;
+			}
 		}
 	}
 
