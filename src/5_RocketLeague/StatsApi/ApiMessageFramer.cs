@@ -2,8 +2,6 @@ using System.Text;
 
 namespace GuillaumeAst.RocketLeague.StatsApi;
 
-// TODO: clean code
-
 public sealed class ApiMessageFramer
 {
 	private readonly Decoder _decoder = Encoding.UTF8.GetDecoder();
