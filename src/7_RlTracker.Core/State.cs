@@ -4,11 +4,6 @@ namespace GuillaumeAst.RlTracker.Core;
 
 public sealed class State : Notifier
 {
-	public Match? CurrentMatch
-	{
-		get;
-		set;
-	}
 	public GameMode CurrentGameMode
 	{
 		get;

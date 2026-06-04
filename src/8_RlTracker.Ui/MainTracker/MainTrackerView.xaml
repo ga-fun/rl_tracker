@@ -1,0 +1,45 @@
+<UserControl
+	x:Class="GuillaumeAst.RlTracker.Ui.Views.MainTrackerView"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	<Border
+		Padding="16"
+		Margin="0"
+		Background="Black"
+		BorderBrush="#DDDDDD"
+		BorderThickness="2">
+		<StackPanel
+			Orientation="Vertical"
+			HorizontalAlignment="Center">
+			<StackPanel.Resources>
+				<Style TargetType="TextBlock">
+					<Setter Property="Foreground" Value="#DDDDDD" />
+					<Setter Property="VerticalAlignment" Value="Center" />
+					<Setter Property="Margin" Value="4,0" />
+				</Style>
+			</StackPanel.Resources>
+			<TextBlock
+				Text="{Binding GameModeValue}"
+				Visibility="{Binding GameModeValueVisibility}"
+				Foreground="#808080"
+				HorizontalAlignment="Center"/>
+			<StackPanel
+				Orientation="Horizontal"
+				VerticalAlignment="Center"
+				Margin="0,8">
+				<TextBlock Text="{Binding WinPrefix}" FontFamily="Segoe UI Emoji"/>
+				<TextBlock Text="{Binding WinCount}"/>
+				<TextBlock Text=" | "/>
+				<TextBlock Text="{Binding LossPrefix}" FontFamily="Segoe UI Emoji"/>
+				<TextBlock Text="{Binding LossCount}"/>
+				<TextBlock Text=" | "/>
+				<TextBlock Text="{Binding StreakPrefix}" FontFamily="Segoe UI Emoji"/>
+				<TextBlock Text="{Binding StreakCount}"/>
+			</StackPanel>
+			<TextBlock
+				Text="{Binding ConnectionStatus}"
+				Foreground="{Binding ConnectionStatusColor}"
+				HorizontalAlignment="Center"/>
+		</StackPanel>
+	</Border>
+</UserControl>

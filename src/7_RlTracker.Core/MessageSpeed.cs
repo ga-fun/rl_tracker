@@ -19,7 +19,7 @@ internal sealed class MessageSpeed
 		if (_timeCurrSec - _timeLastSpeedPrint >= MessageSpeed.SpeedPrintDelaySec)
 		{
 			double messagePerSec = _messageCount / (double)(_timeCurrSec - _timeStartSec);
-			Log.Write(Log.Level.Info, $"{Log.Blue}[{messagePerSec}/sec]");
+			Log.Write(Log.Level.Info, $"[{messagePerSec}/sec]");
 			_timeLastSpeedPrint = _timeCurrSec;
 		}
 	}

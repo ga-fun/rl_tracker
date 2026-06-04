@@ -4,9 +4,12 @@ public static class VdfFile
 {
 	public static string? ReadValue(string filePath, string key)
 	{
-		foreach (string value in ReadValues(filePath, key))
+		foreach (string line in File.ReadLines(filePath))
 		{
-			return value;
+			if (TryReadValue(line, key, out string value))
+			{
+				return value;
+			}
 		}
 		return null;
 	}

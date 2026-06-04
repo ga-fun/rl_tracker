@@ -1,10 +1,16 @@
-using System.Net.Sockets;
+using System.ComponentModel;
+using System.Net;
 using GuillaumeAst.Utils;
 
 namespace GuillaumeAst.Network;
 
 public sealed class Connection : Notifier
 {
+	public enum ClientType
+	{
+		TCP
+	}
+
 	public enum ExceptionAction
 	{
 		Continue,
@@ -21,18 +27,7 @@ public sealed class Connection : Notifier
 		Count
 	}
 
-	private sealed class State(int port, CancellationToken token)
-	{
-		internal readonly int Port = port;
-		internal readonly CancellationToken Token = token;
-		internal Client? Client { get; set; }
-		internal bool ShouldWait { get; set; } = false;
-	}
-
 	private const int ConnectionRetryDelay = 1000;
-
-	public event Action<Exception>? Reconnecting = null;
-	public event Action<string>? MessageReceived = null;
 	public ConnectionStatus Status
 	{
 		get;
@@ -45,19 +40,30 @@ public sealed class Connection : Notifier
 			}
 		}
 	} = ConnectionStatus.Disconnected;
-
+	public event Action<Exception>? Reconnecting = null;
+	public event Action<byte[]>? BytesReceived = null;
+	private readonly Func<Exception, ExceptionAction> _onException;
 	private readonly SemaphoreSlim _publicGate = new(1, 1);
 	private readonly SemaphoreSlim _cleanupGate = new(1, 1);
+	private readonly IPAddress _ipAddress;
+	private readonly int _port;
+	private readonly ClientType _clientType;
+	private ITransportClient? _client = null;
 	private CancellationTokenSource? _tokenSource = null;
 	private Task? _listeningTask = null;
 	private Task? _cleanupTask = null;
-	private Func<Exception, ExceptionAction>? _onException = null;
 	private string? _lastExceptionMessage;
 
-	public async Task StartAsync(int port, Func<Exception, ExceptionAction> onException)
+	public Connection(ClientType clientType, IPAddress ipAddress, int port, Func<Exception, ExceptionAction> onException)
 	{
-		ArgumentNullException.ThrowIfNull(onException);
+		_clientType = clientType;
+		_ipAddress = ipAddress;
+		_port = port;
+		_onException = onException;
+	}
 
+	public async Task StartAsync()
+	{
 		await _publicGate.WaitAsync();
 		try
 		{
@@ -67,9 +73,7 @@ public sealed class Connection : Notifier
 			}
 			Status = ConnectionStatus.Connecting;
 			_tokenSource = new();
-			_onException = onException;
-			State state = new(port, _tokenSource.Token);
-			_listeningTask = TryConnectionLoopAsync(state);
+			_listeningTask = TryConnectionLoopAsync(_tokenSource.Token);
 		}
 		finally
 		{
@@ -90,18 +94,18 @@ public sealed class Connection : Notifier
 		}
 	}
 
-	private async Task TryConnectionLoopAsync(State state)
+	private async Task TryConnectionLoopAsync(CancellationToken token)
 	{
-		while (!state.Token.IsCancellationRequested)
+		while (!token.IsCancellationRequested)
 		{
 			try
 			{
-				await ConnectionLoopAsync(state);
+				await ConnectionLoopAsync(token);
 				return;
 			}
 			catch (Exception exception)
 			{
-				if (_onException!(exception) != ExceptionAction.Continue)
+				if (_onException(exception) != ExceptionAction.Continue)
 				{
 					await StopInternalAsync(true);
 					return;
@@ -110,15 +114,15 @@ public sealed class Connection : Notifier
 		}
 	}
 
-	private async Task ConnectionLoopAsync(State state)
+	private async Task ConnectionLoopAsync(CancellationToken token)
 	{
-		while (!state.Token.IsCancellationRequested)
+		while (!token.IsCancellationRequested)
 		{
-			state.ShouldWait = false;
+			bool shouldWait = false;
 			try
 			{
-				await ConnectAsync(state);
-				await ListenAsync(state);
+				await ConnectAsync(token);
+				await ListenAsync(token);
 			}
 			catch (OperationCanceledException)
 			{
@@ -126,42 +130,52 @@ public sealed class Connection : Notifier
 			}
 			catch (Exception exception) when (exception
 				is IOException
-				or SocketException)
+				or System.Net.Sockets.SocketException)
 			{
-				ConnectionFailed(state, exception);
+				ConnectionFailed(exception);
+				shouldWait = true;
 			}
 			finally
 			{
-				await DisconnectAsync(state);
+				await DisconnectAsync(CancellationToken.None);
 			}
-			if (state.ShouldWait && !state.Token.IsCancellationRequested)
+			if (shouldWait && !token.IsCancellationRequested)
 			{
-				await TryWaitAsync(state);
+				await TryWaitAsync(token);
 			}
 		}
 	}
 
-	private async Task ConnectAsync(State state)
+	private async Task ConnectAsync(CancellationToken token)
 	{
-		state.Client = new(state.Port);
-		await state.Client.ConnectAsync(state.Token);
+		if (_clientType == ClientType.TCP)
+		{
+			_client = new TcpTransportClient(_ipAddress, _port);
+		}
+		else
+		{
+			throw new InvalidEnumArgumentException("Only TCP clients are handled for now");
+		}
+		await _client.ConnectAsync(token);
 		Status = ConnectionStatus.Connected;
 		_lastExceptionMessage = null;
 	}
 	
-	private async Task ListenAsync(State state)
+	private async Task ListenAsync(CancellationToken token)
 	{
-		Client client = state.Client
-			?? throw new InvalidOperationException("Connection client is null");
-		
-		while (!state.Token.IsCancellationRequested)
+		if (_client == null)
 		{
-			string message = await client.ReceiveAsync(state.Token);
-			TryEvent(MessageReceived, message);
+			throw new InvalidOperationException("_client is not set");
+		}
+		
+		while (!token.IsCancellationRequested)
+		{
+			byte[] bytes = await _client.ReceiveAsync(token);
+			TryEvent(BytesReceived, bytes);
 		}
 	}
 
-	private void ConnectionFailed(State state, Exception exception)
+	private void ConnectionFailed(Exception exception)
 	{
 		if (Status == ConnectionStatus.Connected)
 		{
@@ -173,44 +187,24 @@ public sealed class Connection : Notifier
 		{
 			_lastExceptionMessage = exception.Message;
 			Log.Write(Log.Level.Warning, $"Connection failed: {exception.GetType().Name}: {exception.Message}");
-			Log.Write(Log.Level.Info, $"Retrying every {ConnectionRetryDelay} ms...");
+			Log.Write(Log.Level.Debug, $"Retrying every {ConnectionRetryDelay} ms...");
 		}
-		state.ShouldWait = true;
 	}
 
-	private static async Task DisconnectAsync(State state)
+	private async Task DisconnectAsync(CancellationToken token)
 	{
-		Client? client = state.Client;
-
-		if (client != null)
+		if (_client != null)
 		{
-			try
-			{
-				client.Close();
-			}
-			catch (Exception exception) when (exception
-				is IOException
-				or SocketException)
-			{
-				// Already disconnected
-			}
-			catch (ObjectDisposedException)
-			{
-				//  Already disposed
-			}
-			finally
-			{
-				client.Dispose();
-				state.Client = null;
-			}
+			await _client.CloseAsync(token);
+			_client = null;
 		}
 	}
 
-	private static async Task TryWaitAsync(State state)
+	private static async Task TryWaitAsync(CancellationToken token)
 	{
 		try
 		{
-			await Task.Delay(ConnectionRetryDelay, state.Token);
+			await Task.Delay(ConnectionRetryDelay, token);
 		}
 		catch (OperationCanceledException)
 		{
@@ -226,7 +220,7 @@ public sealed class Connection : Notifier
 		}
 		catch (Exception exception)
 		{
-			if (_onException!(exception) == ExceptionAction.Stop)
+			if (_onException(exception) == ExceptionAction.Stop)
 			{
 				throw;
 			}
@@ -271,10 +265,15 @@ public sealed class Connection : Notifier
 		try
 		{
 			_tokenSource?.Cancel();
+			if (_client != null)
+			{
+				await _client.CloseAsync(CancellationToken.None);
+				_client = null;
+			}
 		}
 		catch (ObjectDisposedException)
 		{
-			// Token source is already disposed
+			// Token source or client is already disposed
 		}
 		finally
 		{
@@ -288,7 +287,6 @@ public sealed class Connection : Notifier
 			}
 			finally
 			{
-				_tokenSource = null;
 				_listeningTask = null;
 				_cleanupTask = null;
 				Status = ConnectionStatus.Disconnected;

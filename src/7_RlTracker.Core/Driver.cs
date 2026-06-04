@@ -1,9 +1,13 @@
+using System.Net;
 using System.ComponentModel;
 using GuillaumeAst.Utils;
 using GuillaumeAst.Network;
-using GuillaumeAst.RocketLeague;
-using StatsApiEvent = GuillaumeAst.RocketLeague.StatsApi.Event;
 using GuillaumeAst.RlTracker.Settings;
+using GuillaumeAst.RocketLeague;
+using statsApiMessageFramer = GuillaumeAst.RocketLeague.StatsApi.ApiMessageFramer;
+using StatsApiEvent = GuillaumeAst.RocketLeague.StatsApi.Event;
+
+using System.Text;	// TODO: tmp debug
 
 namespace GuillaumeAst.RlTracker.Core;
 
@@ -41,8 +45,23 @@ public sealed partial class Driver : Notifier
 	}
 	/* ---------- TODO (END): move to RocketLeague Project ---------- */
 
-	public static readonly State State = new();
-	public static readonly Connection Connection = new();
+	public static Driver Instance { get; } = new();
+	public static State State { get; } = new();
+	private static readonly statsApiMessageFramer ApiMessageFramer = new();
+	private static readonly ApiEnventHandler ApiEnventHandler = new(State);
+	private static readonly SemaphoreSlim _gate = new(1, 1);
+	public Connection Connection
+	{
+		get;
+		private set
+		{
+			if (field != value)
+			{
+				field = value;
+				NotifyChange();
+			}
+		}
+	}
 	public Config Config
 	{
 		get;
@@ -55,20 +74,22 @@ public sealed partial class Driver : Notifier
 			}
 		}
 	}
-	public static Driver Instance { get; } = new();
 	
-	private static readonly ApiEnventHandler ApiEnventHandler = new(State);
-	private static readonly SemaphoreSlim _gate = new(1, 1);
-
 	private Driver()
 	{
-		Log.Write(Log.Level.Info, $"Logs will be stored in: {Log.Blue}\"{Log.LogFile}\"");
-		Connection.MessageReceived += OnMessage;
-		Connection.PropertyChanged += OnConnectionChanged;
 		Config = Config.Load();
 		RlNotFound = RlIsNotFound(Config);
 		Config.Apply(out bool rlNeedRestart);
+		Connection = CreateConnection(Config.StatsApiConfig.Port);
 		RlNeedRestart = rlNeedRestart;
+	}
+
+	private Connection CreateConnection(int port)
+	{
+		Connection connection = new(Connection.ClientType.TCP, IPAddress.Loopback, port, OnException);
+		connection.BytesReceived += OnBytesReceived;
+		connection.PropertyChanged += OnConnectionChanged;
+		return connection;
 	}
 
 	public async Task Start()
@@ -84,7 +105,7 @@ public sealed partial class Driver : Notifier
 		}
 	}
 
-	public static async Task Stop()
+	public async Task Stop()
 	{
 		await _gate.WaitAsync();
 		try
@@ -114,7 +135,7 @@ public sealed partial class Driver : Notifier
 
 	private async Task UnsafeUpdateConfigAsync(Config newConfig)
 	{
-		Log.Write(Log.Level.Info, $"{Log.Yellow}Updating core config...");
+		Log.Write(Log.Level.Info, "Updating core config...");
 
 		RlNotFound = RlIsNotFound(newConfig);
 		if (RlNotFound)
@@ -134,10 +155,16 @@ public sealed partial class Driver : Notifier
 				newConfig.Apply(out bool rlNeedRestart);
 				RlNeedRestart = rlNeedRestart;
 			}
+			if (portChanged)
+			{
+				await Connection.StopAsync();
+				Connection = CreateConnection(newConfig.StatsApiConfig.Port);
+				await Connection.StartAsync();
+			}
 		}
 		Config = newConfig;
 		Config.Save();
-		Log.Write(Log.Level.Info, $"{Log.Green}Core config updated");
+		Log.Write(Log.Level.Info, "Core config updated");
 		await UnsafeStart();
 	}
 
@@ -145,7 +172,7 @@ public sealed partial class Driver : Notifier
 	{
 		if (!RlNotFound)
 		{
-			await Connection.StartAsync(Config.StatsApiConfig.Port, OnException);
+			await Connection.StartAsync();
 		}
 	}
 
@@ -156,12 +183,15 @@ public sealed partial class Driver : Notifier
 		return Connection.ExceptionAction.Continue;
 	}
 
-	private void OnMessage(string message)
+	private static void OnBytesReceived(byte[] bytes)
 	{
 		try
 		{
-			StatsApiEvent apiEvent = new(message);
-			ApiEnventHandler.HandleEvent(apiEvent);
+			foreach (string message in ApiMessageFramer.GetApiMessages(bytes))
+			{
+				StatsApiEvent apiEvent = new(message);
+				ApiEnventHandler.HandleEvent(apiEvent);
+			}
 		}
 		catch (Exception exception) when (exception
 			is FormatException
@@ -177,26 +207,8 @@ public sealed partial class Driver : Notifier
 		{
 			return;
 		}
-		Connection.ConnectionStatus status = Connection.Status;
-
-		if (status == Connection.ConnectionStatus.Connected)
-		{
-			Log.Write(Log.Level.Info, $"{Log.Green}{status}");
-		}
-		else if (status == Connection.ConnectionStatus.Disconnected)
-		{
-			Log.Write(Log.Level.Info, $"{Log.Red}{status}");
-			OnDisconnect();
-		}
-		else
-		{
-			Log.Write(Log.Level.Info, $"{Log.Yellow}{status}...");
-		}
-	}
-
-	private void OnDisconnect()
-	{
-		if (RlNeedRestart && !RlProcess.IsRunning())
+		Log.Write(Log.Level.Info, $"{Connection.Status}");
+		if (Connection.Status == Connection.ConnectionStatus.Reconnecting && RlNeedRestart)
 		{
 			RlNeedRestart = false;
 		}

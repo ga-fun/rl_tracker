@@ -55,7 +55,7 @@ public sealed class InstallEpic : Install
 	{
 		if (TryFindFromManifests() || TryFindFromClassicPaths())
 		{
-			Log.Write(Log.Level.Info, $"{Log.Green}RL Epic dir detected: {Log.Blue}\"{InstallDir}\"");
+			Log.Write(Log.Level.Info, $"RL Epic dir detected:\"{InstallDir}\"");
 		}
 		else
 		{

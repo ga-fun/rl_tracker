@@ -14,8 +14,7 @@ public sealed partial class Config : Notifier
 	private const double ApiSendPacketRateDefault = 30;
 	private const string ConfigFileName = "settings.json";
 	private static readonly JsonSerializerOptions JsonOptions = new(){ WriteIndented = true };
-	private static readonly string ConfigFile = Path.Combine(App.Directory, ConfigFileName);
-
+	public static readonly string ConfigFile = Path.Combine(App.Directory, ConfigFileName);
 	public ConfigUI ConfigUI { get; init; } = new();
 	public StatsApiConfig StatsApiConfig { get; init; } = new(null, ApiSendPacketRateDefault);
 	public InstallEpic EpicInstall { get; init; } = new();
@@ -26,7 +25,7 @@ public sealed partial class Config : Notifier
 	public static Config Load()
 	{
 		IsLoading = true;
-		Log.Write(Log.Level.Info, $"Loading config from: {Log.Blue}\"{ConfigFile}\"{Log.Yellow}");
+		Log.Write(Log.Level.Info, $"Loading config from: \"{ConfigFile}\"");
 		try
 		{
 			if (!File.Exists(ConfigFile))
@@ -38,16 +37,8 @@ public sealed partial class Config : Notifier
 			Config? configMaybe = JsonSerializer.Deserialize<Config>(json, JsonOptions);
 			if (configMaybe != null)
 			{
-				configMaybe.SubscribeInstallChanges();
-				if (!configMaybe.EpicInstall.IsValid)
-				{
-					configMaybe.EpicInstall.AutoDetectInstallDir();
-				}
-				if (!configMaybe.SteamInstall.IsValid)
-				{
-					configMaybe.SteamInstall.AutoDetectInstallDir();
-				}
-				Log.Dump(configMaybe, Log.Level.Debug, $"{Log.Green}Config loaded:{Log.Reset}");
+				ProcessParsedConfig(configMaybe);
+				Log.Dump(configMaybe, Log.Level.Debug, $"Config loaded:");
 				return configMaybe;
 			}
 			Log.Write(Log.Level.Error, "Unable to parse config");
@@ -68,24 +59,50 @@ public sealed partial class Config : Notifier
 		}
 	}
 
+	private static void ProcessParsedConfig(Config config)
+	{
+		config.SubscribeInstallChanges();
+		bool RlInstallDirHasChanged = false;
+		if (!config.EpicInstall.IsValid)
+		{
+			config.EpicInstall.AutoDetectInstallDir();
+			if (config.EpicInstall.IsValid)
+			{
+				RlInstallDirHasChanged = true;
+			}
+		}
+		if (!config.SteamInstall.IsValid)
+		{
+			config.SteamInstall.AutoDetectInstallDir();
+			if (config.EpicInstall.IsValid)
+			{
+				RlInstallDirHasChanged = true;
+			}
+		}
+		if (RlInstallDirHasChanged)
+		{
+			config.Save();
+		}
+	}
+
 	public void Apply(out bool rlNeedRestart)
 	{
 		rlNeedRestart = false;
 		if (EpicInstall.InstallDir != null && EpicInstall.IsValid)
 		{
 			StatsApiConfig.Apply(EpicInstall.InstallDir, ref rlNeedRestart);
-			Log.Write(Log.Level.Info, $"{Log.Green}Epic config applied");
+			Log.Write(Log.Level.Info, "Epic config applied");
 		}
 		if (SteamInstall.InstallDir != null && SteamInstall.IsValid)
 		{
 			StatsApiConfig.Apply(SteamInstall.InstallDir, ref rlNeedRestart);
-			Log.Write(Log.Level.Info, $"{Log.Green}Steam config applied");
+			Log.Write(Log.Level.Info, "Steam config applied");
 		}
 	}
 
 	public void Save()
 	{
-		Log.Write(Log.Level.Info, $"{Log.Yellow}Saving config...");
+		Log.Write(Log.Level.Info, "Saving config...");
 		string? directory = Path.GetDirectoryName(ConfigFile);
 
 		if (!string.IsNullOrWhiteSpace(directory))
@@ -94,12 +111,12 @@ public sealed partial class Config : Notifier
 		}
 		string json = JsonSerializer.Serialize(this, JsonOptions);
 		File.WriteAllText(ConfigFile, json);
-		Log.Write(Log.Level.Info, $"{Log.Green}Config saved to: {Log.Blue}\"{ConfigFile}\"{Log.Reset}");
+		Log.Write(Log.Level.Info, $"Config saved to: \"{ConfigFile}\"");
 	}
 
 	private static Config CreateDefault()
 	{
-		Log.Write(Log.Level.Info, $"{Log.Yellow}Creating default config...");
+		Log.Write(Log.Level.Info, "Creating default config...");
 		Config config = new();
 		config.SubscribeInstallChanges();
 		config.EpicInstall.AutoDetectInstallDir();
