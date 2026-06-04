@@ -22,6 +22,8 @@ public partial class App : Application
 			await Driver.Instance.Start();
 			MainWindow window = new();
 			window.Show();
+			Log.Write(Log.Level.Warning, $"================> RlNotFound = {Driver.Instance.RlNotFound}");
+			Log.Write(Log.Level.Warning, $"================> RlNeedRestart = {Driver.Instance.RlNeedRestart}");
 		}
 		catch (Exception exception)
 		{

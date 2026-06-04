@@ -14,8 +14,7 @@ public sealed partial class Config : Notifier
 	private const double ApiSendPacketRateDefault = 30;
 	private const string ConfigFileName = "settings.json";
 	private static readonly JsonSerializerOptions JsonOptions = new(){ WriteIndented = true };
-	private static readonly string ConfigFile = Path.Combine(App.Directory, ConfigFileName);
-
+	public static readonly string ConfigFile = Path.Combine(App.Directory, ConfigFileName);
 	public ConfigUI ConfigUI { get; init; } = new();
 	public StatsApiConfig StatsApiConfig { get; init; } = new(null, ApiSendPacketRateDefault);
 	public InstallEpic EpicInstall { get; init; } = new();
@@ -39,13 +38,26 @@ public sealed partial class Config : Notifier
 			if (configMaybe != null)
 			{
 				configMaybe.SubscribeInstallChanges();
+				bool RlInstallDirHasChanged = false;
 				if (!configMaybe.EpicInstall.IsValid)
 				{
 					configMaybe.EpicInstall.AutoDetectInstallDir();
+					if (configMaybe.EpicInstall.IsValid)
+					{
+						RlInstallDirHasChanged = true;
+					}
 				}
 				if (!configMaybe.SteamInstall.IsValid)
 				{
 					configMaybe.SteamInstall.AutoDetectInstallDir();
+					if (configMaybe.EpicInstall.IsValid)
+					{
+						RlInstallDirHasChanged = true;
+					}
+				}
+				if (RlInstallDirHasChanged)
+				{
+					configMaybe.Save();
 				}
 				Log.Dump(configMaybe, Log.Level.Debug, $"Config loaded:");
 				return configMaybe;

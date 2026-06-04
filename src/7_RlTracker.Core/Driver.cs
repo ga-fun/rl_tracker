@@ -208,7 +208,7 @@ public sealed partial class Driver : Notifier
 			return;
 		}
 		Log.Write(Log.Level.Info, $"{Connection.Status}");
-		if (Connection.Status == Connection.ConnectionStatus.Disconnected && RlNeedRestart && !RlProcess.IsRunning())
+		if (Connection.Status == Connection.ConnectionStatus.Reconnecting && RlNeedRestart)
 		{
 			RlNeedRestart = false;
 		}

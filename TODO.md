@@ -1,14 +1,32 @@
 # TODO
 
+## High priority
+
+- UI => error message `Rocket League not found, please edit {ConfigFile}`
+- UI => warning message `Rocket League config has been modified, please start or restart Rocket League`
+
+## Low Priority
+
+- UI => Refactor `MainTracker`
+- Refactor `Config.Load()`
 - `ApiMessageFramer` => clean code
 - `RlNotFound` + `RlNeedRestart` => move to `RocketLeague.Config`
 - Implement UI
 
----
+## Build command for releases
 
-# FINAL
-
-- `RlTracker.Ui.csproj` change `<OutputType>Exe</OutputType>` to `<OutputType>WinExe</OutputType>`
+```bash
+dotnet publish ".\src\8_RlTracker.Ui\RlTracker.Ui.csproj" `
+	-c Release `
+	-r win-x64 `
+	--self-contained true `
+	-o ".\publish" `
+	-p:PublishSingleFile=true `
+	-p:IncludeNativeLibrariesForSelfExtract=true `
+	-p:EnableCompressionInSingleFile=true `
+	-p:DebugType=None `
+	-p:DebugSymbols=false
+```
 
 ---
 

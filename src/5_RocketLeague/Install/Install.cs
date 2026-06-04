@@ -28,20 +28,12 @@ public abstract class Install : Notifier
 		get;
 		set
 		{
-			if (field == value)
-			{
-				return;
-			}
-			if (value == null || !InstallDirIsValid(value))
-			{
-				AutoDetectInstallDir();
-			}
-			else
+			if (field != value)
 			{
 				field = value;
+				IsValid = InstallDirIsValid(InstallDir);
+				NotifyChange();
 			}
-			IsValid = InstallDirIsValid(InstallDir);
-			NotifyChange();
 		}
 	}
 
