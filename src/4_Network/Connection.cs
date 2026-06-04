@@ -187,7 +187,7 @@ public sealed class Connection : Notifier
 		{
 			_lastExceptionMessage = exception.Message;
 			Log.Write(Log.Level.Warning, $"Connection failed: {exception.GetType().Name}: {exception.Message}");
-			Log.Write(Log.Level.Info, $"Retrying every {ConnectionRetryDelay} ms...");
+			Log.Write(Log.Level.Debug, $"Retrying every {ConnectionRetryDelay} ms...");
 		}
 		_shouldWait = true;
 	}

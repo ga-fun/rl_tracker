@@ -1,6 +1,8 @@
+using GuillaumeAst.Utils;
+
 namespace GuillaumeAst.RlTracker.Ui.ViewModels;
 
-public class MainTrackerViewModel
+public class MainTrackerViewModel : Notifier
 {
 	public string WinPrefix { get; } = "✅";
 	public string LossPrefix { get; } = "❌";

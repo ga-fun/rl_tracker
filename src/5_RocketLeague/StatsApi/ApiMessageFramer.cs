@@ -1,7 +1,8 @@
 using System.Text;
-using GuillaumeAst.Utils;
 
 namespace GuillaumeAst.RocketLeague.StatsApi;
+
+// TODO: clean code
 
 public sealed class ApiMessageFramer
 {
@@ -81,11 +82,7 @@ public sealed class ApiMessageFramer
 		return false;
 	}
 
-	private static void UpdateJsonState(
-		char character,
-		ref bool inString,
-		ref bool escaped,
-		ref int depth)
+	private static void UpdateJsonState(char character, ref bool inString, ref bool escaped, ref int depth)
 	{
 		if (escaped)
 		{

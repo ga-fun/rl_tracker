@@ -188,7 +188,7 @@ public static class Log
 	{
 		string fileName = Path.GetFileName(file);
 		string time = DateTime.Now.ToString("HH:mm:ss.fff");
-		Console.WriteLine($"[{time} {fileName}:{line}:{caller}] {message}{Reset}");
+		Console.WriteLine(message);
 	}
 
 	private static string RemoveColors(string value)

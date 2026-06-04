@@ -22,19 +22,16 @@
 					</Style>
 				</StackPanel.Resources>
 				<TextBlock Text="{Binding WinPrefix}" />
-				<TextBlock Text=" " />
 				<TextBlock Text="{Binding WinCount}"/>
 
 				<TextBlock Text=" | "/>
 
 				<TextBlock Text="{Binding LossPrefix}" />
-				<TextBlock Text=" " />
 				<TextBlock Text="{Binding LossCount}"/>
 
 				<TextBlock Text=" | "/>
 
 				<TextBlock Text="{Binding StreakPrefix}"/>
-				<TextBlock Text=" "/>
 				<TextBlock Text="{Binding StreakCount}"/>
 
 				<TextBlock Text=" | "/>
