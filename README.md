@@ -43,11 +43,11 @@ If the app says that Rocket League needs to restart:
 
 ## Windows / antivirus warning
 
-This early version is not code-signed yet, so Windows or your antivirus may show a warning.
+🙈 This early version is not code-signed yet, so Windows or your antivirus may show a warning.
 
 ## Files location
 
-RlTracker stores its settings and logs here:
+📂 RlTracker stores its settings and logs here:
 
 ```text
 %LOCALAPPDATA%\RlTracker
@@ -55,6 +55,6 @@ RlTracker stores its settings and logs here:
 
 ## Status
 
-This is an early test version.
+🧒 This is an early test version.
 
 The goal for now is simple: check if the tracker works correctly on different Windows machines.
