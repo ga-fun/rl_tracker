@@ -25,14 +25,13 @@ public static class Log
 	private static bool Enabled { get; set; } = false;
 	public static readonly string LogFile = Path.Combine(Dir, FileName);
 
-	// TODO: make default level to Info for release
-	public static void Init(Level levelMin = Level.Debug)
+	public static void Init()
 	{
 		Enabled = true;
-		LevelMin = levelMin;
 		try
 		{
 			Directory.CreateDirectory(Dir);
+			Write(Level.Info, $"Logs will be stored in: \"{LogFile}\"");
 			Cleanup();
 			Write(Level.Debug, $"Log init succeed (Enabled = {Enabled} | LevelMin = {LevelMin})");
 		}
@@ -43,7 +42,6 @@ public static class Log
   			or DirectoryNotFoundException
 			or NotSupportedException)
 		{
-			Write(Level.Error, $"Log init failed: {exception.Message}");
 			Enabled = false;
 		}
 	}
@@ -101,30 +99,12 @@ public static class Log
 	{
 		string fileName = Path.GetFileName(file);
 		string time = $"{DateTime.Now:HH:mm:ss.fff}";
-		// TODO (START): only for console debugging
-		string color = Reset;
-		if (level == Level.Warning)
-		{
-			color = Yellow;
-		}
-		else if (level == Level.Error)
-		{
-			color = Red;
-		}
-		// TODO (STOP): only for console debugging
-		string fmessage = $"[{color}{level}{Reset} | {time} {fileName}:{line}:{caller}] {color}{message}{Reset}";
-		string log = RemoveColors(fmessage);	// TODO: only for console debugging
+		string fmessage = $"[{level} | {time} {fileName}:{line}:{caller}] {message}";
 		try
 		{
 			lock (FileGate)
 			{
-				// TODO (START): only for console debugging
-				if (level != Level.Debug)
-				{
-					PrintInternal(fmessage + Reset, caller, file, line);
-				}
-				// TODO (STOP): only for console debugging
-				File.AppendAllText(LogFile, log + Environment.NewLine);
+				File.AppendAllText(LogFile, fmessage + Environment.NewLine);
 			}
 		}
 		catch (Exception exception) when (exception
@@ -176,29 +156,4 @@ public static class Log
 			|| files.Sum(file => file.Length) > MaxFileSizeInMo * 1024 * 1024
 			|| files[^1].LastWriteTimeUtc < DateTime.UtcNow.AddDays(-(double)MaxFileAgeInDays);
 	}
-
-	// TODO (START): only for console debugging
-	public const string Green = "\u001b[32m";
-	public const string Blue = "\u001b[34m";
-	public const string Red = "\u001b[31m";
-	public const string Yellow = "\u001b[33m";
-	public const string Reset = "\u001b[0m";
-
-	private static void PrintInternal(string message, string caller, string file, int line)
-	{
-		string fileName = Path.GetFileName(file);
-		string time = DateTime.Now.ToString("HH:mm:ss.fff");
-		Console.WriteLine(message);
-	}
-
-	private static string RemoveColors(string value)
-	{
-		return value
-			.Replace(Green, "")
-			.Replace(Blue, "")
-			.Replace(Red, "")
-			.Replace(Yellow, "")
-			.Replace(Reset, "");
-	}
-	// TODO (END): only for console debugging
 }

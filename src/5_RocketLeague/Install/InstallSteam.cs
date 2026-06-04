@@ -37,7 +37,7 @@ public sealed class InstallSteam : Install
 	{
 		if (TryFindFromManifests() || TryFindFromClassicPaths())
 		{
-			Log.Write(Log.Level.Info, $"{Log.Green}RL Steam dir detected: {Log.Blue}\"{InstallDir}\"{Log.Reset}");
+			Log.Write(Log.Level.Info, $"RL Steam dir detected: \"{InstallDir}\"");
 		}
 		else
 		{

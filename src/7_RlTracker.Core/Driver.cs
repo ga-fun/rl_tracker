@@ -77,8 +77,6 @@ public sealed partial class Driver : Notifier
 	
 	private Driver()
 	{
-		Log.Init();
-		Log.Write(Log.Level.Info, $"Logs will be stored in: {Log.Blue}\"{Log.LogFile}\"");
 		Config = Config.Load();
 		RlNotFound = RlIsNotFound(Config);
 		Config.Apply(out bool rlNeedRestart);
@@ -137,7 +135,7 @@ public sealed partial class Driver : Notifier
 
 	private async Task UnsafeUpdateConfigAsync(Config newConfig)
 	{
-		Log.Write(Log.Level.Info, $"{Log.Yellow}Updating core config...");
+		Log.Write(Log.Level.Info, "Updating core config...");
 
 		RlNotFound = RlIsNotFound(newConfig);
 		if (RlNotFound)
@@ -166,7 +164,7 @@ public sealed partial class Driver : Notifier
 		}
 		Config = newConfig;
 		Config.Save();
-		Log.Write(Log.Level.Info, $"{Log.Green}Core config updated");
+		Log.Write(Log.Level.Info, "Core config updated");
 		await UnsafeStart();
 	}
 
@@ -189,8 +187,6 @@ public sealed partial class Driver : Notifier
 	{
 		try
 		{
-			// Log.Write(Log.Level.Debug, $"TCP bytes received: {bytes.Length}");
-			// Log.Write(Log.Level.Debug, $"TCP chunk: [{message.Replace("\\", "\\\\").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\0", "\\0")}]");
 			foreach (string message in ApiMessageFramer.GetApiMessages(bytes))
 			{
 				StatsApiEvent apiEvent = new(message);
@@ -211,26 +207,8 @@ public sealed partial class Driver : Notifier
 		{
 			return;
 		}
-		Connection.ConnectionStatus status = Connection.Status;
-
-		if (status == Connection.ConnectionStatus.Connected)
-		{
-			Log.Write(Log.Level.Info, $"{Log.Green}{status}");
-		}
-		else if (status == Connection.ConnectionStatus.Disconnected)
-		{
-			Log.Write(Log.Level.Info, $"{Log.Red}{status}");
-			OnDisconnect();
-		}
-		else
-		{
-			Log.Write(Log.Level.Info, $"{Log.Yellow}{status}...");
-		}
-	}
-
-	private void OnDisconnect()
-	{
-		if (RlNeedRestart && !RlProcess.IsRunning())
+		Log.Write(Log.Level.Info, $"{Connection.Status}");
+		if (Connection.Status == Connection.ConnectionStatus.Disconnected && RlNeedRestart && !RlProcess.IsRunning())
 		{
 			RlNeedRestart = false;
 		}

@@ -12,6 +12,11 @@ public partial class App : Application
 	{
 		base.OnStartup(eventArgs);
 
+		Log.Init();
+		if (eventArgs.Args.Contains("--debug"))
+		{
+			Log.LevelMin = Log.Level.Debug;
+		}
 		try
 		{
 			await Driver.Instance.Start();

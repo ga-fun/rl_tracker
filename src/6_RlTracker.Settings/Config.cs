@@ -26,7 +26,7 @@ public sealed partial class Config : Notifier
 	public static Config Load()
 	{
 		IsLoading = true;
-		Log.Write(Log.Level.Info, $"Loading config from: {Log.Blue}\"{ConfigFile}\"{Log.Yellow}");
+		Log.Write(Log.Level.Info, $"Loading config from: \"{ConfigFile}\"");
 		try
 		{
 			if (!File.Exists(ConfigFile))
@@ -47,7 +47,7 @@ public sealed partial class Config : Notifier
 				{
 					configMaybe.SteamInstall.AutoDetectInstallDir();
 				}
-				Log.Dump(configMaybe, Log.Level.Debug, $"{Log.Green}Config loaded:{Log.Reset}");
+				Log.Dump(configMaybe, Log.Level.Debug, $"Config loaded:");
 				return configMaybe;
 			}
 			Log.Write(Log.Level.Error, "Unable to parse config");
@@ -74,18 +74,18 @@ public sealed partial class Config : Notifier
 		if (EpicInstall.InstallDir != null && EpicInstall.IsValid)
 		{
 			StatsApiConfig.Apply(EpicInstall.InstallDir, ref rlNeedRestart);
-			Log.Write(Log.Level.Info, $"{Log.Green}Epic config applied");
+			Log.Write(Log.Level.Info, "Epic config applied");
 		}
 		if (SteamInstall.InstallDir != null && SteamInstall.IsValid)
 		{
 			StatsApiConfig.Apply(SteamInstall.InstallDir, ref rlNeedRestart);
-			Log.Write(Log.Level.Info, $"{Log.Green}Steam config applied");
+			Log.Write(Log.Level.Info, "Steam config applied");
 		}
 	}
 
 	public void Save()
 	{
-		Log.Write(Log.Level.Info, $"{Log.Yellow}Saving config...");
+		Log.Write(Log.Level.Info, "Saving config...");
 		string? directory = Path.GetDirectoryName(ConfigFile);
 
 		if (!string.IsNullOrWhiteSpace(directory))
@@ -94,12 +94,12 @@ public sealed partial class Config : Notifier
 		}
 		string json = JsonSerializer.Serialize(this, JsonOptions);
 		File.WriteAllText(ConfigFile, json);
-		Log.Write(Log.Level.Info, $"{Log.Green}Config saved to: {Log.Blue}\"{ConfigFile}\"{Log.Reset}");
+		Log.Write(Log.Level.Info, $"Config saved to: \"{ConfigFile}\"");
 	}
 
 	private static Config CreateDefault()
 	{
-		Log.Write(Log.Level.Info, $"{Log.Yellow}Creating default config...");
+		Log.Write(Log.Level.Info, "Creating default config...");
 		Config config = new();
 		config.SubscribeInstallChanges();
 		config.EpicInstall.AutoDetectInstallDir();

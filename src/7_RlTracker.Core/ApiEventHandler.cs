@@ -74,7 +74,7 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 				if (field != value)
 				{
 					field = value;
-					Log.Write(Log.Level.Info, $"Player.Name = {Log.Yellow}{field}");
+					Log.Write(Log.Level.Info, $"Player.Name = {field}");
 				}
 			}
 		}
@@ -110,7 +110,7 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 				if (field != value)
 				{
 					field = value;
-					Log.Write(Log.Level.Info, $"Player.Team = {Log.Yellow}{field}");
+					Log.Write(Log.Level.Info, $"Player.Team = {field}");
 				}
 			}
 		}
@@ -203,12 +203,6 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 			{
 				UpdateState((PayloadUpdateState)apiEvent.Payload);
 			}
-			// TODO (START): remove before release
-			else if (CurrentEventType == EventType.GoalScored && InReplay == false)
-			{
-				GoalScored((PayloadGoalScored)apiEvent.Payload);
-			}
-			// TODO (END): remove before release
 			else if (CurrentEventType == EventType.MatchEnded)
 			{
 				CurrentMatch.WinnerSoFar = (Team)((PayloadMatchEnded)apiEvent.Payload).WinnerTeamNum;
@@ -320,16 +314,6 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 		}
 	}
 
-	// TODO (START): remove before release
-	private static void GoalScored(PayloadGoalScored payload)
-	{
-		double startSpeed = Math.Round(payload.BallLastTouch.Speed);
-		double goalSpeed = Math.Round(payload.GoalSpeed);
-
-		Log.Write(Log.Level.Info, $"Goal scored: {startSpeed} km/h -> {goalSpeed} km/h");
-	}
-	// TODO (END): remove before release
-
 	private void StopCurrentMatch()
 	{
 		if (CurrentMatch.Ended == true)
@@ -341,32 +325,16 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 			Log.Write(Log.Level.Warning, "Unable to compute match result because player or player's team is null");
 			return;
 		}
-		string Mode = "???";
-		if (CurrentMatch.Mode == GameMode.OneVersusOne)
-		{
-			Mode = "1v1";
-		}
-		else if (CurrentMatch.Mode == GameMode.TwoVersusTwo)
-		{
-			Mode = "2v2";
-		}
-		else if (CurrentMatch.Mode == GameMode.ThreeVersusThree)
-		{
-			Mode = "3v3";
-		}
 		if (CurrentPlayer.Team == CurrentMatch.WinnerSoFar)
 		{
 			State.PlusWin(CurrentMatch.Mode);
-			Log.Write(Log.Level.Info, $"{Log.Green}=> [{Mode}] WIN!");
+			Log.Write(Log.Level.Info, $"=> [{CurrentMatch.Mode} - WIN]");
 		}
 		else
 		{
 			State.PlusLoss(CurrentMatch.Mode);
-			Log.Write(Log.Level.Info, $"{Log.Red}=> [{Mode}] LOSS");
+			Log.Write(Log.Level.Info, $"=> [{CurrentMatch.Mode} - LOSS]");
 		}
-		Log.Write(Log.Level.Info, $"{Log.Blue}-------------");
-		Log.Write(Log.Level.Info, $"{Log.Blue} {State.CurrentTracker.Win} | {State.CurrentTracker.Loss} | {State.CurrentTracker.Streak}");
-		Log.Write(Log.Level.Info, $"{Log.Blue}-------------");
 		CurrentMatch.Ended = true;
 		CurrentPlayer?.Reset();
 		InReplay = false;
