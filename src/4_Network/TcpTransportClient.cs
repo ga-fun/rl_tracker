@@ -38,7 +38,7 @@ public sealed class TcpTransportClient(IPAddress address, int port) : ITransport
 		}
 	}
 
-	public Task CloseAsync(CancellationToken token)
+	public Task CloseAsync(CancellationToken token = default)
 	{
 		Dispose();
 		return Task.CompletedTask;

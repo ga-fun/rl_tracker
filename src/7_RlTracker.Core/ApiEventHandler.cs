@@ -186,7 +186,7 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 				CurrentMatch = new(eventMatchGuid);
 				InReplay = false;
 			}
-			else if (eventMatchGuid == CurrentMatch.Guid && CurrentMatch.Ended == true)
+			else if (eventMatchGuid == CurrentMatch.Guid && CurrentMatch.Ended)
 			{
 				_speed.Print();
 				return;
@@ -242,7 +242,7 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 
 	private void UpdatePlayer(PayloadUpdateState payload)
 	{
-		if (payload.Game.BReplay == false && payload.Game.Target != null
+		if (!payload.Game.BReplay && payload.Game.Target != null
 			&& CurrentPlayer?.Shortcut != payload.Game.Target.Shortcut)
 		{
 			ApiPlayer? apiPlayer = GetPlayerFromShortcut(payload.Players, payload.Game.Target.Shortcut);
@@ -277,7 +277,7 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 	private void UpdateWinner(PayloadUpdateState payload)
 	{
 
-		if (payload.Game.BHasWinner == true)
+		if (payload.Game.BHasWinner)
 		{
 			CurrentMatch.WinnerSoFar = GetWinnerTeamFromWinnerOrScore(payload);
 			StopCurrentMatch();
@@ -319,7 +319,7 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 
 	private void StopCurrentMatch()
 	{
-		if (CurrentMatch.Ended == true)
+		if (CurrentMatch.Ended)
 		{
 			return;
 		}
@@ -339,7 +339,7 @@ internal sealed class ApiEnventHandler(State state) : Notifier
 			Log.Write(Log.Level.Info, $"=> [{CurrentMatch.Mode} - LOSS]");
 		}
 		CurrentMatch.Ended = true;
-		CurrentPlayer?.Reset();
+		CurrentPlayer.Reset();
 		InReplay = false;
 	}
 }

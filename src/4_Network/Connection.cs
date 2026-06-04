@@ -53,7 +53,6 @@ public sealed class Connection : Notifier
 	private Task? _listeningTask = null;
 	private Task? _cleanupTask = null;
 	private string? _lastExceptionMessage;
-	private bool _shouldWait = false;
 
 	public Connection(ClientType clientType, IPAddress ipAddress, int port, Func<Exception, ExceptionAction> onException)
 	{
@@ -119,7 +118,7 @@ public sealed class Connection : Notifier
 	{
 		while (!token.IsCancellationRequested)
 		{
-			_shouldWait = false;
+			bool shouldWait = false;
 			try
 			{
 				await ConnectAsync(token);
@@ -134,12 +133,13 @@ public sealed class Connection : Notifier
 				or System.Net.Sockets.SocketException)
 			{
 				ConnectionFailed(exception);
+				shouldWait = true;
 			}
 			finally
 			{
 				await DisconnectAsync(CancellationToken.None);
 			}
-			if (_shouldWait && !token.IsCancellationRequested)
+			if (shouldWait && !token.IsCancellationRequested)
 			{
 				await TryWaitAsync(token);
 			}
@@ -189,7 +189,6 @@ public sealed class Connection : Notifier
 			Log.Write(Log.Level.Warning, $"Connection failed: {exception.GetType().Name}: {exception.Message}");
 			Log.Write(Log.Level.Debug, $"Retrying every {ConnectionRetryDelay} ms...");
 		}
-		_shouldWait = true;
 	}
 
 	private async Task DisconnectAsync(CancellationToken token)

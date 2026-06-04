@@ -183,7 +183,7 @@ public sealed partial class Driver : Notifier
 		return Connection.ExceptionAction.Continue;
 	}
 
-	private void OnBytesReceived(byte[] bytes)
+	private static void OnBytesReceived(byte[] bytes)
 	{
 		try
 		{

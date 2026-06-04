@@ -37,28 +37,7 @@ public sealed partial class Config : Notifier
 			Config? configMaybe = JsonSerializer.Deserialize<Config>(json, JsonOptions);
 			if (configMaybe != null)
 			{
-				configMaybe.SubscribeInstallChanges();
-				bool RlInstallDirHasChanged = false;
-				if (!configMaybe.EpicInstall.IsValid)
-				{
-					configMaybe.EpicInstall.AutoDetectInstallDir();
-					if (configMaybe.EpicInstall.IsValid)
-					{
-						RlInstallDirHasChanged = true;
-					}
-				}
-				if (!configMaybe.SteamInstall.IsValid)
-				{
-					configMaybe.SteamInstall.AutoDetectInstallDir();
-					if (configMaybe.EpicInstall.IsValid)
-					{
-						RlInstallDirHasChanged = true;
-					}
-				}
-				if (RlInstallDirHasChanged)
-				{
-					configMaybe.Save();
-				}
+				ProcessParsedConfig(configMaybe);
 				Log.Dump(configMaybe, Log.Level.Debug, $"Config loaded:");
 				return configMaybe;
 			}
@@ -77,6 +56,32 @@ public sealed partial class Config : Notifier
 		finally
 		{
 			IsLoading = false;
+		}
+	}
+
+	private static void ProcessParsedConfig(Config config)
+	{
+		config.SubscribeInstallChanges();
+		bool RlInstallDirHasChanged = false;
+		if (!config.EpicInstall.IsValid)
+		{
+			config.EpicInstall.AutoDetectInstallDir();
+			if (config.EpicInstall.IsValid)
+			{
+				RlInstallDirHasChanged = true;
+			}
+		}
+		if (!config.SteamInstall.IsValid)
+		{
+			config.SteamInstall.AutoDetectInstallDir();
+			if (config.EpicInstall.IsValid)
+			{
+				RlInstallDirHasChanged = true;
+			}
+		}
+		if (RlInstallDirHasChanged)
+		{
+			config.Save();
 		}
 	}
 

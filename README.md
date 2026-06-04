@@ -1,6 +1,7 @@
 # RlTracker
 
 [![Latest release](https://img.shields.io/github/v/release/guillaumeast/rl_tracker?style=flat&label=version&color=orange)](https://github.com/guillaumeast/rl_tracker/releases/latest)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=guillaumeast_rl_tracker&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=guillaumeast_rl_tracker)
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D6?style=flat&logo=windows&logoColor=white)](#)
 [![Language](https://img.shields.io/badge/language-C%23-512BD4?style=flat&logo=csharp&logoColor=white)](#)
 [![.NET](https://img.shields.io/badge/-10.0-512BD4?style=flat&logo=dotnet&logoColor=white&labelColor=333333)](#)

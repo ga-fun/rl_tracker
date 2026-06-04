@@ -56,7 +56,7 @@ public static class Log
 	{
 		string dump;
 	
-		if (ShouldWrite(level) == false)
+		if (!ShouldWrite(level))
 		{
 			return;
 		}
@@ -87,7 +87,7 @@ public static class Log
 
 	private static bool ShouldWrite(Level level)
 	{
-		return Enabled == true && level >= LevelMin;
+		return Enabled && level >= LevelMin;
 	}
 
 	private static void WriteInternal(
