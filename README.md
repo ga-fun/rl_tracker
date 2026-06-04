@@ -24,9 +24,9 @@ It shows your wins, losses and current streak while you play.
 
 1. Open the [latest release](https://github.com/guillaumeast/rl_tracker/releases/latest).
 2. Scroll to **Assets**.
-3. Download **RlTracker.exe**.
+3. Download **RL_Tracker_0_0_0.exe**.
 4. Put it anywhere you want, for example on your Desktop.
-5. Double-click **RlTracker.exe** to launch it.
+5. Double-click **RL_Tracker_0_0_0.exe** to launch it.
 
 > ✌️ You do **not** need to install .NET manually.
 
